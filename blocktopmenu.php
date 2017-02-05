@@ -52,8 +52,8 @@ class Blocktopmenu extends Module
     {
         $this->name = 'blocktopmenu';
         $this->tab = 'front_office_features';
-        $this->version = '2.2.4';
-        $this->author = 'PrestaShop';
+        $this->version = '3.0.0';
+        $this->author = 'thirty bees';
 
         $this->bootstrap = true;
         parent::__construct();
