@@ -1,73 +1,111 @@
 <?php
-/*
-* 2007-2016 PrestaShop
-*
-* NOTICE OF LICENSE
-*
-* This source file is subject to the Academic Free License (AFL 3.0)
-* that is bundled with this package in the file LICENSE.txt.
-* It is also available through the world-wide-web at this URL:
-* http://opensource.org/licenses/afl-3.0.php
-* If you did not receive a copy of the license and are unable to
-* obtain it through the world-wide-web, please send an email
-* to license@prestashop.com so we can send you a copy immediately.
-*
-* DISCLAIMER
-*
-* Do not edit or add to this file if you wish to upgrade PrestaShop to newer
-* versions in the future. If you wish to customize PrestaShop for your
-* needs please refer to http://www.prestashop.com for more information.
-*
-*  @author PrestaShop SA <contact@prestashop.com>
-*  @copyright  2007-2016 PrestaShop SA
-*  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
-*  International Registered Trademark & Property of PrestaShop SA
-*/
+/**
+ * 2007-2016 PrestaShop
+ *
+ * thirty bees is an extension to the PrestaShop e-commerce software developed by PrestaShop SA
+ * Copyright (C) 2017 thirty bees
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/afl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@thirtybees.com so we can send you a copy immediately.
+ *
+ * @author    thirty bees <modules@thirtybees.com>
+ * @author    PrestaShop SA <contact@prestashop.com>
+ * @copyright 2017 thirty bees
+ * @copyright 2007-2016 PrestaShop SA
+ * @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * PrestaShop is an internationally registered trademark & property of PrestaShop SA
+ */
 
+/**
+ * Class MenuTopLinks
+ */
 class MenuTopLinks
 {
-    public static function gets($id_lang, $id_linksmenutop = null, $id_shop)
+    /**
+     * @param int      $idLang
+     * @param int|null $idLinksmenutop
+     * @param int      $idShop
+     *
+     * @return array|false|null|PDOStatement
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     */
+    public static function gets($idLang, $idLinksmenutop = null, $idShop)
     {
         $sql = 'SELECT l.id_linksmenutop, l.new_window, s.name, ll.link, ll.label
 				FROM '._DB_PREFIX_.'linksmenutop l
-				LEFT JOIN '._DB_PREFIX_.'linksmenutop_lang ll ON (l.id_linksmenutop = ll.id_linksmenutop AND ll.id_lang = '.(int)$id_lang.' AND ll.id_shop='.(int)$id_shop.')
+				LEFT JOIN '._DB_PREFIX_.'linksmenutop_lang ll ON (l.id_linksmenutop = ll.id_linksmenutop AND ll.id_lang = '.(int) $idLang.' AND ll.id_shop='.(int) $idShop.')
 				LEFT JOIN '._DB_PREFIX_.'shop s ON l.id_shop = s.id_shop
-				WHERE 1 '.((!is_null($id_linksmenutop)) ? ' AND l.id_linksmenutop = "'.(int)$id_linksmenutop.'"' : '').'
-				AND l.id_shop IN (0, '.(int)$id_shop.')';
+				WHERE 1 '.((!is_null($idLinksmenutop)) ? ' AND l.id_linksmenutop = "'.(int) $idLinksmenutop.'"' : '').'
+				AND l.id_shop IN (0, '.(int) $idShop.')';
 
         return Db::getInstance()->executeS($sql);
     }
 
-    public static function get($id_linksmenutop, $id_lang, $id_shop)
+    /**
+     * @param int $idLinksmenutop
+     * @param int $idLang
+     * @param int $idShop
+     *
+     * @return array|false|null|PDOStatement
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     */
+    public static function get($idLinksmenutop, $idLang, $idShop)
     {
-        return self::gets($id_lang, $id_linksmenutop, $id_shop);
+        return self::gets($idLang, $idLinksmenutop, $idShop);
     }
 
-    public static function getLinkLang($id_linksmenutop, $id_shop)
+    /**
+     * @param int $idLinksmenutop
+     * @param int $idShop
+     *
+     * @return array
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     */
+    public static function getLinkLang($idLinksmenutop, $idShop)
     {
         $ret = Db::getInstance()->executeS('
 			SELECT l.id_linksmenutop, l.new_window, ll.link, ll.label, ll.id_lang
 			FROM '._DB_PREFIX_.'linksmenutop l
-			LEFT JOIN '._DB_PREFIX_.'linksmenutop_lang ll ON (l.id_linksmenutop = ll.id_linksmenutop AND ll.id_shop='.(int)$id_shop.')
+			LEFT JOIN '._DB_PREFIX_.'linksmenutop_lang ll ON (l.id_linksmenutop = ll.id_linksmenutop AND ll.id_shop='.(int) $idShop.')
 			WHERE 1
-			'.((!is_null($id_linksmenutop)) ? ' AND l.id_linksmenutop = "'.(int)$id_linksmenutop.'"' : '').'
-			AND l.id_shop IN (0, '.(int)$id_shop.')
+			'.((!is_null($idLinksmenutop)) ? ' AND l.id_linksmenutop = "'.(int) $idLinksmenutop.'"' : '').'
+			AND l.id_shop IN (0, '.(int) $idShop.')
 		');
 
-        $link = array();
-        $label = array();
-        $new_window = false;
+        $link = [];
+        $label = [];
+        $newWindow = false;
 
         foreach ($ret as $line) {
             $link[$line['id_lang']] = Tools::safeOutput($line['link']);
             $label[$line['id_lang']] = Tools::safeOutput($line['label']);
-            $new_window = (bool)$line['new_window'];
+            $newWindow = (bool) $line['new_window'];
         }
 
-        return array('link' => $link, 'label' => $label, 'new_window' => $new_window);
+        return ['link' => $link, 'label' => $label, 'new_window' => $newWindow];
     }
 
-    public static function add($link, $label, $newWindow = 0, $id_shop)
+    /**
+     * @param Link $link
+     * @param      $label
+     * @param int  $newWindow
+     * @param      $idShop
+     *
+     * @return bool
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     */
+    public static function add($link, $label, $newWindow = 0, $idShop)
     {
         if (!is_array($label)) {
             return false;
@@ -78,32 +116,43 @@ class MenuTopLinks
 
         Db::getInstance()->insert(
             'linksmenutop',
-            array(
-                'new_window'=>(int)$newWindow,
-                'id_shop' => (int)$id_shop
-            )
+            [
+                'new_window' => (int) $newWindow,
+                'id_shop'    => (int) $idShop,
+            ]
         );
-        $id_linksmenutop = Db::getInstance()->Insert_ID();
+        $idLinksmenutop = Db::getInstance()->Insert_ID();
 
         $result = true;
 
-        foreach ($label as $id_lang=>$label) {
+        foreach ($label as $idLang => $label) {
             $result &= Db::getInstance()->insert(
-            'linksmenutop_lang',
-            array(
-                'id_linksmenutop'=>(int)$id_linksmenutop,
-                'id_lang'=>(int)$id_lang,
-                'id_shop'=>(int)$id_shop,
-                'label'=>pSQL($label),
-                'link'=>pSQL($link[$id_lang])
-            )
-        );
+                'linksmenutop_lang',
+                [
+                    'id_linksmenutop' => (int) $idLinksmenutop,
+                    'id_lang'         => (int) $idLang,
+                    'id_shop'         => (int) $idShop,
+                    'label'           => pSQL($label),
+                    'link'            => pSQL($link[$idLang]),
+                ]
+            );
         }
 
         return $result;
     }
 
-    public static function update($link, $labels, $newWindow = 0, $id_shop, $id_link)
+    /**
+     * @param     $link
+     * @param     $labels
+     * @param int $newWindow
+     * @param     $idShop
+     * @param     $idLink
+     *
+     * @return bool
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     */
+    public static function update($link, $labels, $newWindow = 0, $idShop, $idLink)
     {
         if (!is_array($labels)) {
             return false;
@@ -114,33 +163,39 @@ class MenuTopLinks
 
         Db::getInstance()->update(
             'linksmenutop',
-            array(
-                'new_window'=>(int)$newWindow,
-                'id_shop' => (int)$id_shop
-            ),
-            'id_linksmenutop = '.(int)$id_link
+            [
+                'new_window' => (int) $newWindow,
+                'id_shop'    => (int) $idShop,
+            ],
+            'id_linksmenutop = '.(int) $idLink
         );
 
-        foreach ($labels as $id_lang => $label) {
+        foreach ($labels as $idLang => $label) {
             Db::getInstance()->update(
                 'linksmenutop_lang',
-                array(
-                    'id_shop'=>(int)$id_shop,
-                    'label'=>pSQL($label),
-                    'link'=>pSQL($link[$id_lang])
-                ),
-                'id_linksmenutop = '.(int)$id_link.' AND id_lang = '.(int)$id_lang
+                [
+                    'id_shop' => (int) $idShop,
+                    'label'   => pSQL($label),
+                    'link'    => pSQL($link[$idLang]),
+                ],
+                'id_linksmenutop = '.(int) $idLink.' AND id_lang = '.(int) $idLang
             );
         }
     }
 
-
-    public static function remove($id_linksmenutop, $id_shop)
+    /**
+     * @param int $idLinksmenutop
+     * @param int $idShop
+     *
+     * @return bool
+     * @throws PrestaShopDatabaseException
+     */
+    public static function remove($idLinksmenutop, $idShop)
     {
         $result = true;
-        $result &= Db::getInstance()->delete('linksmenutop', 'id_linksmenutop = '.(int)$id_linksmenutop.' AND id_shop = '.(int)$id_shop);
-        $result &= Db::getInstance()->delete('linksmenutop_lang', 'id_linksmenutop = '.(int)$id_linksmenutop);
-        
+        $result &= Db::getInstance()->delete('linksmenutop', 'id_linksmenutop = '.(int) $idLinksmenutop.' AND id_shop = '.(int) $idShop);
+        $result &= Db::getInstance()->delete('linksmenutop_lang', 'id_linksmenutop = '.(int) $idLinksmenutop);
+
         return $result;
     }
 }
