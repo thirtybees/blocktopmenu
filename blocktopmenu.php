@@ -63,7 +63,7 @@ class Blocktopmenu extends Module
         $this->bootstrap = true;
         parent::__construct();
 
-        $this->displayName = $this->l('Top horizontal menu');
+        $this->displayName = $this->l('Block Top Menu');
         $this->description = $this->l('Adds a new horizontal menu to the top of your e-commerce website.');
     }
 
