@@ -33,6 +33,7 @@ class Blocktopmenu extends Module
     protected $_menu = '';
     protected $_html = '';
     protected $user_groups;
+	protected $autogenerateImages = null;
 
     /*
      * Pattern for matching config values
@@ -113,7 +114,8 @@ class Blocktopmenu extends Module
             if (!$this->installDb()
                 || !Configuration::updateGlobalValue('MOD_BLOCKTOPMENU_ITEMS', 'CAT3,CAT26')
                 || !Configuration::updateGlobalValue('MOD_BLOCKTOPMENU_SEARCH', '1')
-				|| !Configuration::updateGlobalValue('MOD_BLOCKTOPMENU_MAXLEVELDEPTH', '3')) {
+				|| !Configuration::updateGlobalValue('MOD_BLOCKTOPMENU_MAXLEVELDEPTH', '0')
+				|| !Configuration::updateGlobalValue('MOD_BLOCKTOPMENU_SHOWIMAGES', '0')) {
                 return false;
             }
         }
@@ -162,7 +164,7 @@ class Blocktopmenu extends Module
         $this->clearMenuCache();
 
         if ($deleteParams) {
-            if (!$this->uninstallDB() || !Configuration::deleteByName('MOD_BLOCKTOPMENU_ITEMS') || !Configuration::deleteByName('MOD_BLOCKTOPMENU_SEARCH') || !Configuration::deleteByName('MOD_BLOCKTOPMENU_MAXLEVELDEPTH')) {
+            if (!$this->uninstallDB() || !Configuration::deleteByName('MOD_BLOCKTOPMENU_ITEMS') || !Configuration::deleteByName('MOD_BLOCKTOPMENU_SEARCH') || !Configuration::deleteByName('MOD_BLOCKTOPMENU_MAXLEVELDEPTH') || !Configuration::deleteByName('MOD_BLOCKTOPMENU_SHOWIMAGES')) {
                 return false;
             }
         }
@@ -239,6 +241,8 @@ class Blocktopmenu extends Module
                 $updated &= Configuration::updateValue('MOD_BLOCKTOPMENU_SEARCH', (bool) Tools::getValue('search'), false, (int) $idShopGroup, (int) $idShop);
 				
 				$updated &= Configuration::updateValue('MOD_BLOCKTOPMENU_MAXLEVELDEPTH', (int) Tools::getValue('maxleveldepth'), false, (int) $idShopGroup, (int) $idShop);
+				
+				$updated &= Configuration::updateValue('MOD_BLOCKTOPMENU_SHOWIMAGES', (int) Tools::getValue('showimages'), false, (int) $idShopGroup, (int) $idShop);
 
                 if (!$updated) {
                     $shop = new Shop($idShop);
@@ -663,10 +667,12 @@ class Blocktopmenu extends Module
     protected function generateCategoriesMenu($categories, $isChildren = 0)
     {
         $html = '';
+		
+		$maxLvlDepth = (int) Configuration::get('MOD_BLOCKTOPMENU_MAXLEVELDEPTH');
 
         foreach ($categories as $key => $category) {
             if ($category['level_depth'] > 1) {
-				if ($category['level_depth'] <= (int) Configuration::get('MOD_BLOCKTOPMENU_MAXLEVELDEPTH'))
+				if ($category['level_depth'] <= $maxLvlDepth)
 				{
 					$cat = new Category($category['id_category']);
 					$link = Tools::HtmlEntitiesUTF8($cat->getLink());
@@ -686,27 +692,51 @@ class Blocktopmenu extends Module
 
             $html .= '<li'.(($this->page_name == 'category'
                     && (int) Tools::getValue('id_category') == (int) $category['id_category']) ? ' class="sfHoverForce"' : '').'>';
-            $html .= '<a href="'.$link.'" title="'.$category['name'].'">'.$category['name'].'</a>';
 
+			if ($isChildren > 0 && $this->AutoGenerateImages())
+			{
+				$autoImageData = $this->GetCategoryAutoImageData((int) $category['id_category']);
+				if ($autoImageData != null)
+				{
+					$link_rewrite = $autoImageData[0];
+					$imageId = $autoImageData[1];
+					
+					$html .= '<ul><li class="category-thumbnail">';
+					$html .= '<div><a href="'.$link.'" title="'.$category['name'].'"><img src="'.$this->context->link->getImageLink($link_rewrite, $imageId, 'cart_default').'" alt="'.Tools::SafeOutput($category['name']).'" title="'.Tools::SafeOutput($category['name']).'" class="imgm" /></a></div>';
+					$html .= '</li></ul>';
+				}
+				else
+					$continue = true;
+			}
+			else
+				$continue = true;
+			
+			$html .= '<a href="'.$link.'" title="'.$category['name'].'">'.$category['name'].'</a>';
+				
             if (isset($category['children']) && !empty($category['children'])) {
                 $html .= '<ul>';
-                $html .= $this->generateCategoriesMenu($category['children'], 1);
+
+				$continue = false;
 
                 if ((int) $category['level_depth'] > 1 && !$isChildren) {
-                    $files = scandir(_PS_CAT_IMG_DIR_);
+					if ($continue)
+					{
+						$files = scandir(_PS_CAT_IMG_DIR_);
 
-                    if (count(preg_grep('/^'.$category['id_category'].'-([0-9])?_thumb.jpg/i', $files)) > 0) {
-                        $html .= '<li class="category-thumbnail">';
+						if (count(preg_grep('/^'.$category['id_category'].'-([0-9])?_thumb.jpg/i', $files)) > 0) {
+							$html .= '<li class="category-thumbnail">';
 
-                        foreach ($files as $file) {
-                            if (preg_match('/^'.$category['id_category'].'-([0-9])?_thumb.jpg/i', $file) === 1) {
-                                $html .= '<div><img src="'.$this->context->link->getMediaLink(_THEME_CAT_DIR_.$file).'" alt="'.Tools::SafeOutput($category['name']).'" title="'.Tools::SafeOutput($category['name']).'" class="imgm" /></div>';
-                            }
-                        }
-
-                        $html .= '</li>';
-                    }
+							foreach ($files as $file) {
+								if (preg_match('/^'.$category['id_category'].'-([0-9])?_thumb.jpg/i', $file) === 1) {
+									$html .= '<div><img src="'.$this->context->link->getMediaLink(_THEME_CAT_DIR_.$file).'" alt="'.Tools::SafeOutput($category['name']).'" title="'.Tools::SafeOutput($category['name']).'" class="imgm" /></div>';
+								}
+							}
+							$html .= '</li>';
+						}
+					}
                 }
+				
+				$html .= $this->generateCategoriesMenu($category['children'], 1);
 
                 $html .= '</ul>';
             }
@@ -716,6 +746,59 @@ class Blocktopmenu extends Module
 
         return $html;
     }
+	
+	private function GetCategoryAutoImageData($categoryId)
+	{
+		if ($categoryId != null && $categoryId != 0)
+		{
+			$cacheId = 'blocktopmenu->GetCategoryAutoImageData_'.md5((int) $this->context->shop->id.(int) $categoryId.(int) $this->context->language->id);
+
+			if (!Cache::isStored($cacheId)) {	
+				$sql = 'SELECT i.`id_image`, pl.`link_rewrite`
+				FROM `'._DB_PREFIX_.'category_product` cp
+				RIGHT JOIN `'._DB_PREFIX_.'product` p
+				ON (p.`id_product` = cp.`id_product`)
+				INNER JOIN `'._DB_PREFIX_.'product_lang` pl
+				ON (pl.`id_product` = p.`id_product`)
+				INNER JOIN `'._DB_PREFIX_.'image` i
+				ON (i.`id_product` = p.`id_product`)
+				WHERE pl.`id_lang` = '.(int) $this->context->language->id.'
+				AND pl.`id_shop` = '.(int) $this->context->shop->id.'
+				AND i.`cover` = 1
+				AND cp.`id_category` IN (SELECT id_category FROM `'._DB_PREFIX_.'category` WHERE id_parent = '. $categoryId .' AND active = 1)
+				AND p.`active` = 1
+				OR cp.`id_category` = '. $categoryId .'
+				ORDER BY price DESC LIMIT 1';
+				
+				$row = Db::getInstance()->executeS($sql);
+				
+				$autoImageData = null;
+				
+				if ($row != null && count($row) > 0)
+				{
+					$autoImageData =
+						array(
+							$row[0]['link_rewrite'],
+							$row[0]['id_image'],
+						);
+				}
+				
+				Cache::store($cacheId, $autoImageData);
+			}
+			
+			return Cache::retrieve($cacheId);
+		}
+		return null;
+	}
+	
+	private function AutoGenerateImages()
+	{
+		if ($this->autogenerateImages == null)
+		{
+			$this->autogenerateImages = Configuration::get('MOD_BLOCKTOPMENU_SHOWIMAGES', false, $idShopGroup, $idShop);
+		}
+		return (bool) $this->autogenerateImages;
+	}
 
     /**
      * @param      $parent
@@ -1084,6 +1167,24 @@ class Blocktopmenu extends Module
                             'label' => $this->l('Maximum level depth'),
                             'name'  => 'maxleveldepth',
 						],
+						[
+                            'type'    => 'switch',
+                            'label'   => $this->l('Automatically select images for subcategories?'),
+                            'name'    => 'showimages',
+                            'is_bool' => true,
+                            'values'  => [
+                                [
+                                    'id'    => 'active_on',
+                                    'value' => 1,
+                                    'label' => $this->l('Enabled'),
+                                ],
+                                [
+                                    'id'    => 'active_off',
+                                    'value' => 0,
+                                    'label' => $this->l('Disabled'),
+                                ],
+                            ],
+                        ],
                         [
                             'type'    => 'switch',
                             'label'   => $this->l('Search bar'),
@@ -1124,6 +1225,24 @@ class Blocktopmenu extends Module
                             'label' => $this->l('Maximum level depth'),
                             'name'  => 'maxleveldepth',
 						],
+						[
+                            'type'    => 'switch',
+                            'label'   => $this->l('Automatically select images for subcategories?'),
+                            'name'    => 'showimages',
+                            'is_bool' => true,
+                            'values'  => [
+                                [
+                                    'id'    => 'active_on',
+                                    'value' => 1,
+                                    'label' => $this->l('Enabled'),
+                                ],
+                                [
+                                    'id'    => 'active_off',
+                                    'value' => 0,
+                                    'label' => $this->l('Disabled'),
+                                ],
+                            ],
+                        ],
                         [
                             'type'    => 'switch',
                             'label'   => $this->l('Search bar'),
@@ -1366,7 +1485,7 @@ class Blocktopmenu extends Module
 		$maxLvlDepth = Configuration::get('MOD_BLOCKTOPMENU_MAXLEVELDEPTH', 0, $idShopGroup, $idShop);
 
         $cacheId = 'Category::getNestedCategories_'.md5((int) $idShop.(int) $rootCategory.(int) $idLang.(int) $active.(int) $active
-                .(isset($groups) && Group::isFeatureActive() ? implode('', $groups) : ''));
+                .(isset($groups) && Group::isFeatureActive() ? implode('', $groups) : '').(int) $maxLvlDepth);
 
         if (!Cache::isStored($cacheId)) {
             $result = Db::getInstance()->executeS('
@@ -1414,11 +1533,13 @@ class Blocktopmenu extends Module
             $idShopGroup = Shop::getGroupFromShop($idShop);
             $isSearchOn &= (bool) Configuration::get('MOD_BLOCKTOPMENU_SEARCH', null, $idShopGroup, $idShop);
 			$maxLvlDepth = (int) Configuration::get('MOD_BLOCKTOPMENU_MAXLEVELDEPTH', 0, $idShopGroup, $idShop);
+			$showImages = (bool) Configuration::get('MOD_BLOCKTOPMENU_SHOWIMAGES', 0, $idShopGroup, $idShop);
         }
 
         return [
             'search' => (int) $isSearchOn,
 			'maxleveldepth' => (int) $maxLvlDepth,
+			'showimages' => (int) $showImages,
         ];
     }
 
