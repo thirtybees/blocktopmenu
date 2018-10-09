@@ -795,7 +795,7 @@ class Blocktopmenu extends Module
 	{
 		if ($this->autogenerateImages == null)
 		{
-			$this->autogenerateImages = Configuration::get('MOD_BLOCKTOPMENU_SHOWIMAGES', false, $idShopGroup, $idShop);
+			$this->autogenerateImages = Configuration::get('MOD_BLOCKTOPMENU_SHOWIMAGES', false, Shop::getGroupFromShop($this->context->shop->id), $this->context->shop->id);
 		}
 		return (bool) $this->autogenerateImages;
 	}
