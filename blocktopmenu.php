@@ -674,8 +674,7 @@ class Blocktopmenu extends Module
             if ($category['level_depth'] > 1) {
 				if ($category['level_depth'] <= $maxLvlDepth)
 				{
-					$cat = new Category($category['id_category']);
-					$link = Tools::HtmlEntitiesUTF8($cat->getLink());
+					$link = $this->context->link->getCategoryLink($category['id_category']);
 				}
 				else
 				{
