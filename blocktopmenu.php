@@ -712,12 +712,11 @@ class Blocktopmenu extends Module
 			
 			$html .= '<a href="'.$link.'" title="'.$category['name'].'">'.$category['name'].'</a>';
 				
-            if (isset($category['children']) && !empty($category['children'])) {
+            if (isset($category['children']) && !empty($category['children']) && ((int) $category['level_depth'] > 1) && $isChildren) {
                 $html .= '<ul>';
 
 				$continue = false;
 
-                if ((int) $category['level_depth'] > 1 && !$isChildren) {
 					if ($continue)
 					{
 						$files = scandir(_PS_CAT_IMG_DIR_);
@@ -733,7 +732,6 @@ class Blocktopmenu extends Module
 							$html .= '</li>';
 						}
 					}
-                }
 				
 				$html .= $this->generateCategoriesMenu($category['children'], 1);
 
