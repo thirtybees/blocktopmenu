@@ -33,7 +33,7 @@ class Blocktopmenu extends Module
     protected $_menu = '';
     protected $_html = '';
     protected $user_groups;
-	protected $autogenerateImages = null;
+    protected $autogenerateImages = null;
 
     /*
      * Pattern for matching config values
@@ -114,8 +114,8 @@ class Blocktopmenu extends Module
             if (!$this->installDb()
                 || !Configuration::updateGlobalValue('MOD_BLOCKTOPMENU_ITEMS', 'CAT3,CAT26')
                 || !Configuration::updateGlobalValue('MOD_BLOCKTOPMENU_SEARCH', '1')
-				|| !Configuration::updateGlobalValue('MOD_BLOCKTOPMENU_MAXLEVELDEPTH', '0')
-				|| !Configuration::updateGlobalValue('MOD_BLOCKTOPMENU_SHOWIMAGES', '0')) {
+                || !Configuration::updateGlobalValue('MOD_BLOCKTOPMENU_MAXLEVELDEPTH', '2')
+                || !Configuration::updateGlobalValue('MOD_BLOCKTOPMENU_SHOWIMAGES', '0')) {
                 return false;
             }
         }
@@ -239,10 +239,10 @@ class Blocktopmenu extends Module
                 }
 
                 $updated &= Configuration::updateValue('MOD_BLOCKTOPMENU_SEARCH', (bool) Tools::getValue('search'), false, (int) $idShopGroup, (int) $idShop);
-				
-				$updated &= Configuration::updateValue('MOD_BLOCKTOPMENU_MAXLEVELDEPTH', (int) Tools::getValue('maxleveldepth'), false, (int) $idShopGroup, (int) $idShop);
-				
-				$updated &= Configuration::updateValue('MOD_BLOCKTOPMENU_SHOWIMAGES', (int) Tools::getValue('showimages'), false, (int) $idShopGroup, (int) $idShop);
+                
+                $updated &= Configuration::updateValue('MOD_BLOCKTOPMENU_MAXLEVELDEPTH', (int) Tools::getValue('maxleveldepth'), false, (int) $idShopGroup, (int) $idShop);
+                
+                $updated &= Configuration::updateValue('MOD_BLOCKTOPMENU_SHOWIMAGES', (int) Tools::getValue('showimages'), false, (int) $idShopGroup, (int) $idShop);
 
                 if (!$updated) {
                     $shop = new Shop($idShop);
@@ -667,19 +667,19 @@ class Blocktopmenu extends Module
     protected function generateCategoriesMenu($categories, $isChildren = 0)
     {
         $html = '';
-		
-		$maxLvlDepth = (int) Configuration::get('MOD_BLOCKTOPMENU_MAXLEVELDEPTH');
+        
+        $maxLvlDepth = (int) Configuration::get('MOD_BLOCKTOPMENU_MAXLEVELDEPTH');
 
         foreach ($categories as $key => $category) {
             if ($category['level_depth'] > 1) {
-				if ($category['level_depth'] <= $maxLvlDepth)
-				{
-					$link = $this->context->link->getCategoryLink($category['id_category']);
-				}
-				else
-				{
-					continue;
-				}
+                if ($category['level_depth'] <= $maxLvlDepth)
+                {
+                    $link = $this->context->link->getCategoryLink($category['id_category']);
+                }
+                else
+                {
+                    continue;
+                }
             } else {
                 $link = $this->context->link->getPageLink('index');
             }
@@ -692,48 +692,48 @@ class Blocktopmenu extends Module
             $html .= '<li'.(($this->page_name == 'category'
                     && (int) Tools::getValue('id_category') == (int) $category['id_category']) ? ' class="sfHoverForce"' : '').'>';
 
-			if ($isChildren > 0 && $this->AutoGenerateImages())
-			{
-				$autoImageData = $this->GetCategoryAutoImageData((int) $category['id_category']);
-				if ($autoImageData != null)
-				{
-					$link_rewrite = $autoImageData[0];
-					$imageId = $autoImageData[1];
-					
-					$html .= '<ul><li class="category-thumbnail">';
-					$html .= '<div><a href="'.$link.'" title="'.$category['name'].'"><img src="'.$this->context->link->getImageLink($link_rewrite, $imageId, 'cart_default').'" alt="'.Tools::SafeOutput($category['name']).'" title="'.Tools::SafeOutput($category['name']).'" class="imgm" /></a></div>';
-					$html .= '</li></ul>';
-				}
-				else
-					$continue = true;
-			}
-			else
-				$continue = true;
-			
-			$html .= '<a href="'.$link.'" title="'.$category['name'].'">'.$category['name'].'</a>';
-				
+            if ($isChildren > 0 && $this->AutoGenerateImages())
+            {
+                $autoImageData = $this->GetCategoryAutoImageData((int) $category['id_category']);
+                if ($autoImageData != null)
+                {
+                    $link_rewrite = $autoImageData[0];
+                    $imageId = $autoImageData[1];
+                    
+                    $html .= '<ul><li class="category-thumbnail">';
+                    $html .= '<div><a href="'.$link.'" title="'.$category['name'].'"><img src="'.$this->context->link->getImageLink($link_rewrite, $imageId, 'cart_default').'" alt="'.Tools::SafeOutput($category['name']).'" title="'.Tools::SafeOutput($category['name']).'" class="imgm" /></a></div>';
+                    $html .= '</li></ul>';
+                }
+                else
+                    $continue = true;
+            }
+            else
+                $continue = true;
+            
+            $html .= '<a href="'.$link.'" title="'.$category['name'].'">'.$category['name'].'</a>';
+                
             if (isset($category['children']) && !empty($category['children']) && ((int) $category['level_depth'] > 1) && $isChildren) {
                 $html .= '<ul>';
 
-				$continue = false;
+                $continue = false;
 
-					if ($continue)
-					{
-						$files = scandir(_PS_CAT_IMG_DIR_);
+                    if ($continue)
+                    {
+                        $files = scandir(_PS_CAT_IMG_DIR_);
 
-						if (count(preg_grep('/^'.$category['id_category'].'-([0-9])?_thumb.jpg/i', $files)) > 0) {
-							$html .= '<li class="category-thumbnail">';
+                        if (count(preg_grep('/^'.$category['id_category'].'-([0-9])?_thumb.jpg/i', $files)) > 0) {
+                            $html .= '<li class="category-thumbnail">';
 
-							foreach ($files as $file) {
-								if (preg_match('/^'.$category['id_category'].'-([0-9])?_thumb.jpg/i', $file) === 1) {
-									$html .= '<div><img src="'.$this->context->link->getMediaLink(_THEME_CAT_DIR_.$file).'" alt="'.Tools::SafeOutput($category['name']).'" title="'.Tools::SafeOutput($category['name']).'" class="imgm" /></div>';
-								}
-							}
-							$html .= '</li>';
-						}
-					}
-				
-				$html .= $this->generateCategoriesMenu($category['children'], 1);
+                            foreach ($files as $file) {
+                                if (preg_match('/^'.$category['id_category'].'-([0-9])?_thumb.jpg/i', $file) === 1) {
+                                    $html .= '<div><img src="'.$this->context->link->getMediaLink(_THEME_CAT_DIR_.$file).'" alt="'.Tools::SafeOutput($category['name']).'" title="'.Tools::SafeOutput($category['name']).'" class="imgm" /></div>';
+                                }
+                            }
+                            $html .= '</li>';
+                        }
+                    }
+                
+                $html .= $this->generateCategoriesMenu($category['children'], 1);
 
                 $html .= '</ul>';
             }
@@ -743,59 +743,59 @@ class Blocktopmenu extends Module
 
         return $html;
     }
-	
-	private function GetCategoryAutoImageData($categoryId)
-	{
-		if ($categoryId != null && $categoryId != 0)
-		{
-			$cacheId = 'blocktopmenu->GetCategoryAutoImageData_'.md5((int) $this->context->shop->id.(int) $categoryId.(int) $this->context->language->id);
+    
+    private function GetCategoryAutoImageData($categoryId)
+    {
+        if ($categoryId != null && $categoryId != 0)
+        {
+            $cacheId = 'blocktopmenu->GetCategoryAutoImageData_'.md5((int) $this->context->shop->id.(int) $categoryId.(int) $this->context->language->id);
 
-			if (!Cache::isStored($cacheId)) {	
-				$sql = 'SELECT i.`id_image`, pl.`link_rewrite`
-				FROM `'._DB_PREFIX_.'category_product` cp
-				RIGHT JOIN `'._DB_PREFIX_.'product` p
-				ON (p.`id_product` = cp.`id_product`)
-				INNER JOIN `'._DB_PREFIX_.'product_lang` pl
-				ON (pl.`id_product` = p.`id_product`)
-				INNER JOIN `'._DB_PREFIX_.'image` i
-				ON (i.`id_product` = p.`id_product`)
-				WHERE pl.`id_lang` = '.(int) $this->context->language->id.'
-				AND pl.`id_shop` = '.(int) $this->context->shop->id.'
-				AND i.`cover` = 1
-				AND cp.`id_category` IN (SELECT id_category FROM `'._DB_PREFIX_.'category` WHERE id_parent = '. $categoryId .' AND active = 1)
-				AND p.`active` = 1
-				OR cp.`id_category` = '. $categoryId .'
-				ORDER BY price DESC LIMIT 1';
-				
-				$row = Db::getInstance()->executeS($sql);
-				
-				$autoImageData = null;
-				
-				if ($row != null && count($row) > 0)
-				{
-					$autoImageData =
-						array(
-							$row[0]['link_rewrite'],
-							$row[0]['id_image'],
-						);
-				}
-				
-				Cache::store($cacheId, $autoImageData);
-			}
-			
-			return Cache::retrieve($cacheId);
-		}
-		return null;
-	}
-	
-	private function AutoGenerateImages()
-	{
-		if ($this->autogenerateImages == null)
-		{
-			$this->autogenerateImages = Configuration::get('MOD_BLOCKTOPMENU_SHOWIMAGES', false, Shop::getGroupFromShop($this->context->shop->id), $this->context->shop->id);
-		}
-		return (bool) $this->autogenerateImages;
-	}
+            if (!Cache::isStored($cacheId)) {    
+                $sql = 'SELECT i.`id_image`, pl.`link_rewrite`
+                FROM `'._DB_PREFIX_.'category_product` cp
+                RIGHT JOIN `'._DB_PREFIX_.'product` p
+                ON (p.`id_product` = cp.`id_product`)
+                INNER JOIN `'._DB_PREFIX_.'product_lang` pl
+                ON (pl.`id_product` = p.`id_product`)
+                INNER JOIN `'._DB_PREFIX_.'image` i
+                ON (i.`id_product` = p.`id_product`)
+                WHERE pl.`id_lang` = '.(int) $this->context->language->id.'
+                AND pl.`id_shop` = '.(int) $this->context->shop->id.'
+                AND i.`cover` = 1
+                AND cp.`id_category` IN (SELECT id_category FROM `'._DB_PREFIX_.'category` WHERE id_parent = '. $categoryId .' AND active = 1)
+                AND p.`active` = 1
+                OR cp.`id_category` = '. $categoryId .'
+                ORDER BY price DESC LIMIT 1';
+                
+                $row = Db::getInstance()->executeS($sql);
+                
+                $autoImageData = null;
+                
+                if ($row != null && count($row) > 0)
+                {
+                    $autoImageData =
+                        array(
+                            $row[0]['link_rewrite'],
+                            $row[0]['id_image'],
+                        );
+                }
+                
+                Cache::store($cacheId, $autoImageData);
+            }
+            
+            return Cache::retrieve($cacheId);
+        }
+        return null;
+    }
+    
+    private function AutoGenerateImages()
+    {
+        if ($this->autogenerateImages == null)
+        {
+            $this->autogenerateImages = Configuration::get('MOD_BLOCKTOPMENU_SHOWIMAGES', false, Shop::getGroupFromShop($this->context->shop->id), $this->context->shop->id);
+        }
+        return (bool) $this->autogenerateImages;
+    }
 
     /**
      * @param      $parent
@@ -953,29 +953,29 @@ class Blocktopmenu extends Module
 
         if (Tools::version_compare(_PS_VERSION_, '1.6.0.12', '>=') == true) {
             $joinShop = ' INNER JOIN `'._DB_PREFIX_.'cms_category_shop` cs
-			ON (bcp.`id_cms_category` = cs.`id_cms_category`)';
+            ON (bcp.`id_cms_category` = cs.`id_cms_category`)';
             $whereShop = ' AND cs.`id_shop` = '.(int) $idShop.' AND cl.`id_shop` = '.(int) $idShop;
         }
 
         if ($recursive === false) {
             $sql = 'SELECT bcp.`id_cms_category`, bcp.`id_parent`, bcp.`level_depth`, bcp.`active`, bcp.`position`, cl.`name`, cl.`link_rewrite`
-				FROM `'._DB_PREFIX_.'cms_category` bcp'.
+                FROM `'._DB_PREFIX_.'cms_category` bcp'.
                 $joinShop.'
-				INNER JOIN `'._DB_PREFIX_.'cms_category_lang` cl
-				ON (bcp.`id_cms_category` = cl.`id_cms_category`)
-				WHERE cl.`id_lang` = '.(int) $idLang.'
-				AND bcp.`id_parent` = '.(int) $parent.
+                INNER JOIN `'._DB_PREFIX_.'cms_category_lang` cl
+                ON (bcp.`id_cms_category` = cl.`id_cms_category`)
+                WHERE cl.`id_lang` = '.(int) $idLang.'
+                AND bcp.`id_parent` = '.(int) $parent.
                 $whereShop;
 
             return Db::getInstance()->executeS($sql);
         } else {
             $sql = 'SELECT bcp.`id_cms_category`, bcp.`id_parent`, bcp.`level_depth`, bcp.`active`, bcp.`position`, cl.`name`, cl.`link_rewrite`
-				FROM `'._DB_PREFIX_.'cms_category` bcp'.
+                FROM `'._DB_PREFIX_.'cms_category` bcp'.
                 $joinShop.'
-				INNER JOIN `'._DB_PREFIX_.'cms_category_lang` cl
-				ON (bcp.`id_cms_category` = cl.`id_cms_category`)
-				WHERE cl.`id_lang` = '.(int) $idLang.'
-				AND bcp.`id_parent` = '.(int) $parent.
+                INNER JOIN `'._DB_PREFIX_.'cms_category_lang` cl
+                ON (bcp.`id_cms_category` = cl.`id_cms_category`)
+                WHERE cl.`id_lang` = '.(int) $idLang.'
+                AND bcp.`id_parent` = '.(int) $parent.
                 $whereShop;
 
             $results = Db::getInstance()->executeS($sql);
@@ -1011,17 +1011,17 @@ class Blocktopmenu extends Module
         }
 
         $sql = 'SELECT c.`id_cms`, cl.`meta_title`, cl.`link_rewrite`
-			FROM `'._DB_PREFIX_.'cms` c
-			INNER JOIN `'._DB_PREFIX_.'cms_shop` cs
-			ON (c.`id_cms` = cs.`id_cms`)
-			INNER JOIN `'._DB_PREFIX_.'cms_lang` cl
-			ON (c.`id_cms` = cl.`id_cms`)
-			WHERE c.`id_cms_category` = '.(int) $idCmsCategory.'
-			AND cs.`id_shop` = '.(int) $idShop.'
-			AND cl.`id_lang` = '.(int) $idLang.
+            FROM `'._DB_PREFIX_.'cms` c
+            INNER JOIN `'._DB_PREFIX_.'cms_shop` cs
+            ON (c.`id_cms` = cs.`id_cms`)
+            INNER JOIN `'._DB_PREFIX_.'cms_lang` cl
+            ON (c.`id_cms` = cl.`id_cms`)
+            WHERE c.`id_cms_category` = '.(int) $idCmsCategory.'
+            AND cs.`id_shop` = '.(int) $idShop.'
+            AND cl.`id_lang` = '.(int) $idLang.
             $whereShop.'
-			AND c.`active` = 1
-			ORDER BY `position`';
+            AND c.`active` = 1
+            ORDER BY `position`';
 
         return Db::getInstance()->executeS($sql);
     }
@@ -1114,29 +1114,29 @@ class Blocktopmenu extends Module
     public function hookActionShopDataDuplication($params)
     {
         $linksmenutop = Db::getInstance()->executeS('
-			SELECT *
-			FROM '._DB_PREFIX_.'linksmenutop
-			WHERE id_shop = '.(int) $params['old_id_shop']
+            SELECT *
+            FROM '._DB_PREFIX_.'linksmenutop
+            WHERE id_shop = '.(int) $params['old_id_shop']
         );
 
         foreach ($linksmenutop as $id => $link) {
             Db::getInstance()->execute('
-				INSERT IGNORE INTO '._DB_PREFIX_.'linksmenutop (id_linksmenutop, id_shop, new_window)
-				VALUES (NULL, '.(int) $params['new_id_shop'].', '.(int) $link['new_window'].')');
+                INSERT IGNORE INTO '._DB_PREFIX_.'linksmenutop (id_linksmenutop, id_shop, new_window)
+                VALUES (NULL, '.(int) $params['new_id_shop'].', '.(int) $link['new_window'].')');
 
             $linksmenutop[$id]['new_id_linksmenutop'] = Db::getInstance()->Insert_ID();
         }
 
         foreach ($linksmenutop as $id => $link) {
             $lang = Db::getInstance()->executeS('
-					SELECT id_lang, '.(int) $params['new_id_shop'].', label, link
-					FROM '._DB_PREFIX_.'linksmenutop_lang
-					WHERE id_linksmenutop = '.(int) $link['id_linksmenutop'].' AND id_shop = '.(int) $params['old_id_shop']);
+                    SELECT id_lang, '.(int) $params['new_id_shop'].', label, link
+                    FROM '._DB_PREFIX_.'linksmenutop_lang
+                    WHERE id_linksmenutop = '.(int) $link['id_linksmenutop'].' AND id_shop = '.(int) $params['old_id_shop']);
 
             foreach ($lang as $l) {
                 Db::getInstance()->execute('
-					INSERT IGNORE INTO '._DB_PREFIX_.'linksmenutop_lang (id_linksmenutop, id_lang, id_shop, label, link)
-					VALUES ('.(int) $link['new_id_linksmenutop'].', '.(int) $l['id_lang'].', '.(int) $params['new_id_shop'].', '.(int) $l['label'].', '.(int) $l['link'].' )');
+                    INSERT IGNORE INTO '._DB_PREFIX_.'linksmenutop_lang (id_linksmenutop, id_lang, id_shop, label, link)
+                    VALUES ('.(int) $link['new_id_linksmenutop'].', '.(int) $l['id_lang'].', '.(int) $params['new_id_shop'].', '.(int) $l['label'].', '.(int) $l['link'].' )');
             }
         }
     }
@@ -1159,12 +1159,12 @@ class Blocktopmenu extends Module
                             'name'  => 'link',
                             'lang'  => true,
                         ],
-						[
-							'type'  => 'text',
+                        [
+                            'type'  => 'text',
                             'label' => $this->l('Maximum level depth'),
                             'name'  => 'maxleveldepth',
-						],
-						[
+                        ],
+                        [
                             'type'    => 'switch',
                             'label'   => $this->l('Automatically select images for subcategories?'),
                             'name'    => 'showimages',
@@ -1217,12 +1217,12 @@ class Blocktopmenu extends Module
                     'info'   => '<div class="alert alert-warning">'.
                         $this->l('All active products combinations quantities will be changed').'</div>',
                     'input'  => [
-						[
-							'type'  => 'text',
+                        [
+                            'type'  => 'text',
                             'label' => $this->l('Maximum level depth'),
                             'name'  => 'maxleveldepth',
-						],
-						[
+                        ],
+                        [
                             'type'    => 'switch',
                             'label'   => $this->l('Automatically select images for subcategories?'),
                             'name'    => 'showimages',
@@ -1478,26 +1478,26 @@ class Blocktopmenu extends Module
         if (isset($groups) && Group::isFeatureActive() && !is_array($groups)) {
             $groups = (array) $groups;
         }
-		
-		$maxLvlDepth = Configuration::get('MOD_BLOCKTOPMENU_MAXLEVELDEPTH', 0, $idShopGroup, $idShop);
+        
+        $maxLvlDepth = Configuration::get('MOD_BLOCKTOPMENU_MAXLEVELDEPTH', 0, $idShopGroup, $idShop);
 
         $cacheId = 'Category::getNestedCategories_'.md5((int) $idShop.(int) $rootCategory.(int) $idLang.(int) $active.(int) $active
                 .(isset($groups) && Group::isFeatureActive() ? implode('', $groups) : '').(int) $maxLvlDepth);
 
         if (!Cache::isStored($cacheId)) {
             $result = Db::getInstance()->executeS('
-							SELECT c.*, cl.*
-				FROM `'._DB_PREFIX_.'category` c
-				INNER JOIN `'._DB_PREFIX_.'category_shop` category_shop ON (category_shop.`id_category` = c.`id_category` AND category_shop.`id_shop` = "'.(int) $idShop.'")
-				LEFT JOIN `'._DB_PREFIX_.'category_lang` cl ON (c.`id_category` = cl.`id_category` AND cl.`id_shop` = "'.(int) $idShop.'")
-				WHERE 1 '.$sqlFilter.' '.($idLang ? 'AND cl.`id_lang` = '.(int) $idLang : '').'
-				'.($active ? ' AND (c.`active` = 1 OR c.`is_root_category` = 1)' : '').'
-				'.($maxLvlDepth > 0 ? ' AND c.`level_depth` <= ' . $maxLvlDepth : '').'
-				'.(isset($groups) && Group::isFeatureActive() ? ' AND cg.`id_group` IN ('.implode(',', $groups).')' : '').'
-				'.(!$idLang || (isset($groups) && Group::isFeatureActive()) ? ' GROUP BY c.`id_category`' : '').'
-				'.($sqlSort != '' ? $sqlSort : ' ORDER BY c.`level_depth` ASC').'
-				'.($sqlSort == '' && $useShopRestriction ? ', category_shop.`position` ASC' : '').'
-				'.($sqlLimit != '' ? $sqlLimit : '')
+                            SELECT c.*, cl.*
+                FROM `'._DB_PREFIX_.'category` c
+                INNER JOIN `'._DB_PREFIX_.'category_shop` category_shop ON (category_shop.`id_category` = c.`id_category` AND category_shop.`id_shop` = "'.(int) $idShop.'")
+                LEFT JOIN `'._DB_PREFIX_.'category_lang` cl ON (c.`id_category` = cl.`id_category` AND cl.`id_shop` = "'.(int) $idShop.'")
+                WHERE 1 '.$sqlFilter.' '.($idLang ? 'AND cl.`id_lang` = '.(int) $idLang : '').'
+                '.($active ? ' AND (c.`active` = 1 OR c.`is_root_category` = 1)' : '').'
+                '.($maxLvlDepth > 0 ? ' AND c.`level_depth` <= ' . $maxLvlDepth : '').'
+                '.(isset($groups) && Group::isFeatureActive() ? ' AND cg.`id_group` IN ('.implode(',', $groups).')' : '').'
+                '.(!$idLang || (isset($groups) && Group::isFeatureActive()) ? ' GROUP BY c.`id_category`' : '').'
+                '.($sqlSort != '' ? $sqlSort : ' ORDER BY c.`level_depth` ASC').'
+                '.($sqlSort == '' && $useShopRestriction ? ', category_shop.`position` ASC' : '').'
+                '.($sqlLimit != '' ? $sqlLimit : '')
             );
 
             $categories = [];
@@ -1524,19 +1524,19 @@ class Blocktopmenu extends Module
     {
         $shops = Shop::getContextListShopID();
         $isSearchOn = true;
-		$maxLvlDepth = 0;
+        $maxLvlDepth = 0;
 
         foreach ($shops as $idShop) {
             $idShopGroup = Shop::getGroupFromShop($idShop);
             $isSearchOn &= (bool) Configuration::get('MOD_BLOCKTOPMENU_SEARCH', null, $idShopGroup, $idShop);
-			$maxLvlDepth = (int) Configuration::get('MOD_BLOCKTOPMENU_MAXLEVELDEPTH', 0, $idShopGroup, $idShop);
-			$showImages = (bool) Configuration::get('MOD_BLOCKTOPMENU_SHOWIMAGES', 0, $idShopGroup, $idShop);
+            $maxLvlDepth = (int) Configuration::get('MOD_BLOCKTOPMENU_MAXLEVELDEPTH', 0, $idShopGroup, $idShop);
+            $showImages = (bool) Configuration::get('MOD_BLOCKTOPMENU_SHOWIMAGES', 0, $idShopGroup, $idShop);
         }
 
         return [
             'search' => (int) $isSearchOn,
-			'maxleveldepth' => (int) $maxLvlDepth,
-			'showimages' => (int) $showImages,
+            'maxleveldepth' => (int) $maxLvlDepth,
+            'showimages' => (int) $showImages,
         ];
     }
 
