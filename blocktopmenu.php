@@ -23,6 +23,10 @@
  * PrestaShop is an internationally registered trademark of PrestaShop SA.
  */
 
+if ( ! defined('_TB_VERSION_')) {
+    exit;
+}
+
 require __DIR__.'/menutoplinks.class.php';
 
 /**
@@ -239,9 +243,9 @@ class Blocktopmenu extends Module
                 }
 
                 $updated &= Configuration::updateValue('MOD_BLOCKTOPMENU_SEARCH', (bool) Tools::getValue('search'), false, (int) $idShopGroup, (int) $idShop);
-                
+
                 $updated &= Configuration::updateValue('MOD_BLOCKTOPMENU_MAXLEVELDEPTH', (int) Tools::getValue('maxleveldepth'), false, (int) $idShopGroup, (int) $idShop);
-                
+
                 $updated &= Configuration::updateValue('MOD_BLOCKTOPMENU_SHOWIMAGES', (int) Tools::getValue('showimages'), false, (int) $idShopGroup, (int) $idShop);
 
                 if (!$updated) {
@@ -667,7 +671,7 @@ class Blocktopmenu extends Module
     protected function generateCategoriesMenu($categories, $isChildren = 0)
     {
         $html = '';
-        
+
         $maxLvlDepth = (int) Configuration::get('MOD_BLOCKTOPMENU_MAXLEVELDEPTH');
 
         foreach ($categories as $key => $category) {
@@ -699,7 +703,7 @@ class Blocktopmenu extends Module
                 {
                     $link_rewrite = $autoImageData[0];
                     $imageId = $autoImageData[1];
-                    
+
                     $html .= '<ul><li class="category-thumbnail">';
                     $html .= '<div><a href="'.$link.'" title="'.$category['name'].'"><img src="'.$this->context->link->getImageLink($link_rewrite, $imageId, 'cart_default').'" alt="'.Tools::SafeOutput($category['name']).'" title="'.Tools::SafeOutput($category['name']).'" class="imgm" /></a></div>';
                     $html .= '</li></ul>';
@@ -709,9 +713,9 @@ class Blocktopmenu extends Module
             }
             else
                 $continue = true;
-            
+
             $html .= '<a href="'.$link.'" title="'.$category['name'].'">'.$category['name'].'</a>';
-                
+
             if (isset($category['children']) && !empty($category['children']) && ((int) $category['level_depth'] > 1) && $isChildren) {
                 $html .= '<ul>';
 
@@ -732,7 +736,7 @@ class Blocktopmenu extends Module
                             $html .= '</li>';
                         }
                     }
-                
+
                 $html .= $this->generateCategoriesMenu($category['children'], 1);
 
                 $html .= '</ul>';
@@ -743,14 +747,14 @@ class Blocktopmenu extends Module
 
         return $html;
     }
-    
+
     private function GetCategoryAutoImageData($categoryId)
     {
         if ($categoryId != null && $categoryId != 0)
         {
             $cacheId = 'blocktopmenu->GetCategoryAutoImageData_'.md5((int) $this->context->shop->id.(int) $categoryId.(int) $this->context->language->id);
 
-            if (!Cache::isStored($cacheId)) {    
+            if (!Cache::isStored($cacheId)) {
                 $sql = 'SELECT i.`id_image`, pl.`link_rewrite`
                 FROM `'._DB_PREFIX_.'category_product` cp
                 RIGHT JOIN `'._DB_PREFIX_.'product` p
@@ -766,11 +770,11 @@ class Blocktopmenu extends Module
                 AND p.`active` = 1
                 OR cp.`id_category` = '. $categoryId .'
                 ORDER BY price DESC LIMIT 1';
-                
+
                 $row = Db::getInstance()->executeS($sql);
-                
+
                 $autoImageData = null;
-                
+
                 if ($row != null && count($row) > 0)
                 {
                     $autoImageData =
@@ -779,15 +783,15 @@ class Blocktopmenu extends Module
                             $row[0]['id_image'],
                         );
                 }
-                
+
                 Cache::store($cacheId, $autoImageData);
             }
-            
+
             return Cache::retrieve($cacheId);
         }
         return null;
     }
-    
+
     private function AutoGenerateImages()
     {
         if ($this->autogenerateImages == null)
@@ -1478,7 +1482,7 @@ class Blocktopmenu extends Module
         if (isset($groups) && Group::isFeatureActive() && !is_array($groups)) {
             $groups = (array) $groups;
         }
-        
+
         $maxLvlDepth = Configuration::get('MOD_BLOCKTOPMENU_MAXLEVELDEPTH', 0, $idShopGroup, $idShop);
 
         $cacheId = 'Category::getNestedCategories_'.md5((int) $idShop.(int) $rootCategory.(int) $idLang.(int) $active.(int) $active
