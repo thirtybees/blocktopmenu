@@ -953,14 +953,10 @@ class Blocktopmenu extends Module
     {
         $idLang = $idLang ? (int) $idLang : (int) Context::getContext()->language->id;
         $idShop = ($idShop !== false) ? $idShop : Context::getContext()->shop->id;
-        $joinShop = '';
-        $whereShop = '';
 
-        if (Tools::version_compare(_PS_VERSION_, '1.6.0.12', '>=') == true) {
-            $joinShop = ' INNER JOIN `'._DB_PREFIX_.'cms_category_shop` cs
+        $joinShop = ' INNER JOIN `'._DB_PREFIX_.'cms_category_shop` cs
             ON (bcp.`id_cms_category` = cs.`id_cms_category`)';
-            $whereShop = ' AND cs.`id_shop` = '.(int) $idShop.' AND cl.`id_shop` = '.(int) $idShop;
-        }
+        $whereShop = ' AND cs.`id_shop` = '.(int) $idShop.' AND cl.`id_shop` = '.(int) $idShop;
 
         if ($recursive === false) {
             $sql = 'SELECT bcp.`id_cms_category`, bcp.`id_parent`, bcp.`level_depth`, bcp.`active`, bcp.`position`, cl.`name`, cl.`link_rewrite`
@@ -1010,11 +1006,6 @@ class Blocktopmenu extends Module
         $idShop = ($idShop !== false) ? (int) $idShop : (int) Context::getContext()->shop->id;
         $idLang = $idLang ? (int) $idLang : (int) Context::getContext()->language->id;
 
-        $whereShop = '';
-        if (Tools::version_compare(_PS_VERSION_, '1.6.0.12', '>=') == true) {
-            $whereShop = ' AND cl.`id_shop` = '.(int) $idShop;
-        }
-
         $sql = 'SELECT c.`id_cms`, cl.`meta_title`, cl.`link_rewrite`
             FROM `'._DB_PREFIX_.'cms` c
             INNER JOIN `'._DB_PREFIX_.'cms_shop` cs
@@ -1023,8 +1014,8 @@ class Blocktopmenu extends Module
             ON (c.`id_cms` = cl.`id_cms`)
             WHERE c.`id_cms_category` = '.(int) $idCmsCategory.'
             AND cs.`id_shop` = '.(int) $idShop.'
-            AND cl.`id_lang` = '.(int) $idLang.
-            $whereShop.'
+            AND cl.`id_lang` = '.(int) $idLang.'
+            AND cl.`id_shop` = '.(int) $idShop.'
             AND c.`active` = 1
             ORDER BY `position`';
 
