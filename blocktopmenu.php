@@ -72,6 +72,7 @@ class Blocktopmenu extends Module
         $this->displayName = $this->l('Block Top Menu');
         $this->description = $this->l('Adds a new horizontal menu to the top of your e-commerce website.');
         $this->tb_versions_compliancy = '> 1.0.0';
+        $this->tb_min_version = '1.0.0';
     }
 
     /**
