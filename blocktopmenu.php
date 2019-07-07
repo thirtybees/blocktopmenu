@@ -680,20 +680,16 @@ class Blocktopmenu extends Module
             return '';
         }
 
-        $html = '';
-
         $maxLvlDepth = (int) Configuration::get('MOD_BLOCKTOPMENU_MAXLEVELDEPTH');
+        if ($maxLvlDepth && $depth >= $maxLvlDepth) {
+            return '';
+        }
+
+        $html = '';
 
         foreach ($categories as $key => $category) {
             if ($category['level_depth'] > 1) {
-                if ($category['level_depth'] <= $maxLvlDepth)
-                {
-                    $link = $this->context->link->getCategoryLink($category['id_category']);
-                }
-                else
-                {
-                    continue;
-                }
+                $link = $this->context->link->getCategoryLink($category['id_category']);
             } else {
                 $link = $this->context->link->getPageLink('index');
             }
@@ -726,7 +722,10 @@ class Blocktopmenu extends Module
 
             $html .= '<a href="'.$link.'" title="'.$category['name'].'">'.$category['name'].'</a>';
 
-            if (isset($category['children']) && $category['children']) {
+            $hasChildren = isset($category['children']) && !!$category['children'];
+            $reachedMaxDepth = $maxLvlDepth ? ($depth+1 >= $maxLvlDepth) : true;
+
+            if ($hasChildren && ! $reachedMaxDepth) {
                 $html .= '<ul>';
 
                 $continue = false;
