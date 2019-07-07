@@ -668,13 +668,18 @@ class Blocktopmenu extends Module
     }
 
     /**
-     * @param     $categories
-     * @param int $isChildren
+     * @param array $categories list of categories to render
+     * @param int $depth
      *
      * @return string
+     * @throws PrestaShopException
      */
-    protected function generateCategoriesMenu($categories, $isChildren = 0)
+    protected function generateCategoriesMenu($categories, $depth = 0)
     {
+        if (! $categories) {
+            return '';
+        }
+
         $html = '';
 
         $maxLvlDepth = (int) Configuration::get('MOD_BLOCKTOPMENU_MAXLEVELDEPTH');
@@ -701,7 +706,7 @@ class Blocktopmenu extends Module
             $html .= '<li'.(($this->page_name == 'category'
                     && (int) Tools::getValue('id_category') == (int) $category['id_category']) ? ' class="sfHoverForce"' : '').'>';
 
-            if ($isChildren > 0 && $this->AutoGenerateImages())
+            if ($depth > 0 && $this->AutoGenerateImages())
             {
                 $autoImageData = $this->GetCategoryAutoImageData((int) $category['id_category']);
                 if ($autoImageData != null)
@@ -721,7 +726,7 @@ class Blocktopmenu extends Module
 
             $html .= '<a href="'.$link.'" title="'.$category['name'].'">'.$category['name'].'</a>';
 
-            if (isset($category['children']) && !empty($category['children']) && ((int) $category['level_depth'] > 1) && $isChildren) {
+            if (isset($category['children']) && $category['children']) {
                 $html .= '<ul>';
 
                 $continue = false;
@@ -742,7 +747,7 @@ class Blocktopmenu extends Module
                         }
                     }
 
-                $html .= $this->generateCategoriesMenu($category['children'], 1);
+                $html .= $this->generateCategoriesMenu($category['children'], $depth + 1);
 
                 $html .= '</ul>';
             }
