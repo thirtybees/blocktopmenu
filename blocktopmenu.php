@@ -526,6 +526,13 @@ class Blocktopmenu extends Module
         return $html.'</select>';
     }
 
+    /**
+     * Main method to generate menu items
+     *
+     * @throws Adapter_Exception
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     */
     protected function makeMenu()
     {
         $menuItems = $this->getMenuItems();
@@ -542,10 +549,7 @@ class Blocktopmenu extends Module
 
             switch (substr($item, 0, strlen($value[1]))) {
                 case 'CAT':
-                    try {
-                        $this->_menu .= $this->generateCategoriesMenu(Category::getNestedCategories($id, $idLang, false, $this->user_groups));
-                    } catch (PrestaShopException $e) {
-                    }
+                    $this->_menu .= $this->generateCategoriesMenu(Category::getNestedCategories($id, $idLang, false, $this->user_groups));
                     break;
 
                 case 'PRD':
