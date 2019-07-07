@@ -1475,6 +1475,7 @@ class Blocktopmenu extends Module
             $groups = (array) $groups;
         }
 
+        $idShopGroup = Shop::getGroupFromShop($idShop);
         $maxLvlDepth = Configuration::get('MOD_BLOCKTOPMENU_MAXLEVELDEPTH', 0, $idShopGroup, $idShop);
 
         $cacheId = 'Category::getNestedCategories_'.md5((int) $idShop.(int) $rootCategory.(int) $idLang.(int) $active.(int) $active
