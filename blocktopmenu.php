@@ -702,52 +702,29 @@ class Blocktopmenu extends Module
             $html .= '<li'.(($this->page_name == 'category'
                     && (int) Tools::getValue('id_category') == (int) $category['id_category']) ? ' class="sfHoverForce"' : '').'>';
 
-            if ($depth > 0 && $this->AutoGenerateImages())
-            {
-                $autoImageData = $this->GetCategoryAutoImageData((int) $category['id_category']);
-                if ($autoImageData != null)
-                {
-                    $link_rewrite = $autoImageData[0];
-                    $imageId = $autoImageData[1];
-
-                    $html .= '<ul><li class="category-thumbnail">';
-                    $html .= '<div><a href="'.$link.'" title="'.$category['name'].'"><img src="'.$this->context->link->getImageLink($link_rewrite, $imageId, 'cart_default').'" alt="'.Tools::SafeOutput($category['name']).'" title="'.Tools::SafeOutput($category['name']).'" class="imgm" /></a></div>';
-                    $html .= '</li></ul>';
-                }
-                else
-                    $continue = true;
-            }
-            else
-                $continue = true;
-
             $html .= '<a href="'.$link.'" title="'.$category['name'].'">'.$category['name'].'</a>';
 
             $hasChildren = isset($category['children']) && !!$category['children'];
             $reachedMaxDepth = $maxLvlDepth ? ($depth+1 >= $maxLvlDepth) : true;
+            $images = $depth > 0 ? [] : $this->getCategoryImages((int)$category['id_category']);
 
-            if ($hasChildren && ! $reachedMaxDepth) {
+            if (!!$images || ($hasChildren && !$reachedMaxDepth)) {
                 $html .= '<ul>';
 
-                $continue = false;
+                if ($hasChildren && !$reachedMaxDepth) {
+                    $html .= $this->generateCategoriesMenu($category['children'], $depth + 1);
+                }
 
-                    if ($continue)
-                    {
-                        $files = scandir(_PS_CAT_IMG_DIR_);
+                if ($images) {
+                    $html .= '<li class="category-thumbnail">';
 
-                        if (count(preg_grep('/^'.$category['id_category'].'-([0-9])?_thumb.jpg/i', $files)) > 0) {
-                            $html .= '<li class="category-thumbnail">';
-
-                            foreach ($files as $file) {
-                                if (preg_match('/^'.$category['id_category'].'-([0-9])?_thumb.jpg/i', $file) === 1) {
-                                    $html .= '<div><img src="'.$this->context->link->getMediaLink(_THEME_CAT_DIR_.$file).'" alt="'.Tools::SafeOutput($category['name']).'" title="'.Tools::SafeOutput($category['name']).'" class="imgm" /></div>';
-                                }
-                            }
-                            $html .= '</li>';
-                        }
+                    foreach ($images as $image) {
+                        $html .= '<div>';
+                        $html .= '<img src="'.$image.'" alt="'.Tools::SafeOutput($category['name']).'" title="'.Tools::SafeOutput($category['name']).'" class="imgm" />';
+                        $html .= '</div>';
                     }
-
-                $html .= $this->generateCategoriesMenu($category['children'], $depth + 1);
-
+                    $html .= '</li>';
+                }
                 $html .= '</ul>';
             }
 
@@ -757,51 +734,82 @@ class Blocktopmenu extends Module
         return $html;
     }
 
-    private function GetCategoryAutoImageData($categoryId)
+    /**
+     * Return list of urls to category images
+     *
+     * @param $categoryId
+     * @return string[]
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     */
+    private function getCategoryImages($categoryId)
     {
-        if ($categoryId != null && $categoryId != 0)
-        {
-            $cacheId = 'blocktopmenu->GetCategoryAutoImageData_'.md5((int) $this->context->shop->id.(int) $categoryId.(int) $this->context->language->id);
+        $categoryId = (int)$categoryId;
+        $images = [];
 
-            if (!Cache::isStored($cacheId)) {
-                $sql = 'SELECT i.`id_image`, pl.`link_rewrite`
-                FROM `'._DB_PREFIX_.'category_product` cp
-                RIGHT JOIN `'._DB_PREFIX_.'product` p
-                ON (p.`id_product` = cp.`id_product`)
-                INNER JOIN `'._DB_PREFIX_.'product_lang` pl
-                ON (pl.`id_product` = p.`id_product`)
-                INNER JOIN `'._DB_PREFIX_.'image` i
-                ON (i.`id_product` = p.`id_product`)
-                WHERE pl.`id_lang` = '.(int) $this->context->language->id.'
-                AND pl.`id_shop` = '.(int) $this->context->shop->id.'
-                AND i.`cover` = 1
-                AND cp.`id_category` IN (SELECT id_category FROM `'._DB_PREFIX_.'category` WHERE id_parent = '. $categoryId .' AND active = 1)
-                AND p.`active` = 1
-                OR cp.`id_category` = '. $categoryId .'
-                ORDER BY price DESC LIMIT 1';
+        // first, look if any menu category thumbnails exists for this category
+        if (file_exists(_PS_CAT_IMG_DIR_)) {
+            $files = scandir(_PS_CAT_IMG_DIR_);
 
-                $row = Db::getInstance()->executeS($sql);
-
-                $autoImageData = null;
-
-                if ($row != null && count($row) > 0)
-                {
-                    $autoImageData =
-                        array(
-                            $row[0]['link_rewrite'],
-                            $row[0]['id_image'],
-                        );
+            if (count(preg_grep('/^' . $categoryId . '-([0-9])?_thumb.jpg/i', $files)) > 0) {
+                foreach ($files as $file) {
+                    if (preg_match('/^' . $categoryId . '-([0-9])?_thumb.jpg/i', $file) === 1) {
+                        $images[] = $this->context->link->getMediaLink(_THEME_CAT_DIR_ . $file);
+                    }
                 }
-
-                Cache::store($cacheId, $autoImageData);
             }
-
-            return Cache::retrieve($cacheId);
         }
-        return null;
+
+        if ($images) {
+            return $images;
+        }
+
+        // if no images were found, we can use product image from category
+        if ($this->autoGenerateImages()) {
+            $images = $this->generateCategoryImages($categoryId);
+        }
+
+        return $images;
     }
 
-    private function AutoGenerateImages()
+    /**
+     * Returns images of 3 most priced products in category
+     *
+     * @param $categoryId
+     * @return string[]
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     */
+    private function generateCategoryImages($categoryId)
+    {
+        if ($categoryId)
+        {
+            $images = [];
+
+            $sql = (new DbQuery)
+                ->select('DISTINCT pl.link_rewrite, i.id_image, p.price')
+                ->from('product', 'p')
+                ->innerJoin('category_product', 'cp', 'cp.id_product = p.id_product')
+                ->innerJoin('image', 'i', 'i.id_product = p.id_product AND i.cover')
+                ->innerJoin('product_lang', 'pl', 'pl.id_product = p.id_product AND pl.id_lang = ' . (int)$this->context->language->id .' AND pl.id_shop = '. (int)$this->context->shop->id)
+                ->where('p.active')
+                ->where('cp.id_category = '.$categoryId.' OR cp.id_category IN (SELECT id_category FROM '._DB_PREFIX_.'category WHERE id_parent = '. $categoryId .' AND active = 1)')
+                ->orderBy('p.price DESC')
+                ->limit(3) ;
+
+            $results = Db::getInstance()->executeS($sql);
+            foreach ($results as $row) {
+                $rewrite = $row['link_rewrite'];
+                $imageId = (int)$row['id_image'];
+                $images[] = $this->context->link->getImageLink($rewrite, $imageId, ImageType::getFormatedName('home'));
+            }
+
+            return $images;
+        }
+        return [];
+    }
+
+    private function autoGenerateImages()
     {
         if ($this->autogenerateImages == null)
         {
