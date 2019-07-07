@@ -62,7 +62,7 @@ class Blocktopmenu extends Module
     {
         $this->name = 'blocktopmenu';
         $this->tab = 'front_office_features';
-        $this->version = '3.0.3';
+        $this->version = '3.0.4';
         $this->author = 'thirty bees';
         $this->need_instance = 0;
 
