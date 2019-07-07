@@ -1483,11 +1483,8 @@ class Blocktopmenu extends Module
             $groups = (array) $groups;
         }
 
-        $idShopGroup = Shop::getGroupFromShop($idShop);
-        $maxLvlDepth = Configuration::get('MOD_BLOCKTOPMENU_MAXLEVELDEPTH', 0, $idShopGroup, $idShop);
-
         $cacheId = 'Category::getNestedCategories_'.md5((int) $idShop.(int) $rootCategory.(int) $idLang.(int) $active.(int) $active
-                .(isset($groups) && Group::isFeatureActive() ? implode('', $groups) : '').(int) $maxLvlDepth);
+                .(isset($groups) && Group::isFeatureActive() ? implode('', $groups) : ''));
 
         if (!Cache::isStored($cacheId)) {
             $result = Db::getInstance()->executeS('
@@ -1497,7 +1494,6 @@ class Blocktopmenu extends Module
                 LEFT JOIN `'._DB_PREFIX_.'category_lang` cl ON (c.`id_category` = cl.`id_category` AND cl.`id_shop` = "'.(int) $idShop.'")
                 WHERE 1 '.$sqlFilter.' '.($idLang ? 'AND cl.`id_lang` = '.(int) $idLang : '').'
                 '.($active ? ' AND (c.`active` = 1 OR c.`is_root_category` = 1)' : '').'
-                '.($maxLvlDepth > 0 ? ' AND c.`level_depth` <= ' . $maxLvlDepth : '').'
                 '.(isset($groups) && Group::isFeatureActive() ? ' AND cg.`id_group` IN ('.implode(',', $groups).')' : '').'
                 '.(!$idLang || (isset($groups) && Group::isFeatureActive()) ? ' GROUP BY c.`id_category`' : '').'
                 '.($sqlSort != '' ? $sqlSort : ' ORDER BY c.`level_depth` ASC').'
