@@ -709,23 +709,26 @@ class Blocktopmenu extends Module
             $images = $depth > 0 ? [] : $this->getCategoryImages((int)$category['id_category']);
 
             if (!!$images || ($hasChildren && !$reachedMaxDepth)) {
-                $html .= '<ul>';
+                $subHtml = '';
 
                 if ($hasChildren && !$reachedMaxDepth) {
-                    $html .= $this->generateCategoriesMenu($category['children'], $depth + 1);
+                    $subHtml .= $this->generateCategoriesMenu($category['children'], $depth + 1);
                 }
 
                 if ($images) {
-                    $html .= '<li class="category-thumbnail">';
+                    $subHtml .= '<li class="category-thumbnail">';
 
                     foreach ($images as $image) {
-                        $html .= '<div>';
-                        $html .= '<img src="'.$image.'" alt="'.Tools::SafeOutput($category['name']).'" title="'.Tools::SafeOutput($category['name']).'" class="imgm" />';
-                        $html .= '</div>';
+                        $subHtml .= '<div>';
+                        $subHtml .= '<img src="'.$image.'" alt="'.Tools::SafeOutput($category['name']).'" title="'.Tools::SafeOutput($category['name']).'" class="imgm" />';
+                        $subHtml .= '</div>';
                     }
-                    $html .= '</li>';
+                    $subHtml .= '</li>';
                 }
-                $html .= '</ul>';
+                
+                if (!empty($subHtml)) {
+                    $html .= '<ul>'.$subHtml.'</ul>';   
+                }
             }
 
             $html .= '</li>';
