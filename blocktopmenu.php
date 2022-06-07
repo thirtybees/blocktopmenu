@@ -1560,11 +1560,6 @@ class Blocktopmenu extends Module
 
         if (Tools::isSubmit('updatelinksmenutop')) {
             $link = MenuTopLinks::getLinkLang(Tools::getValue('id_linksmenutop'), (int) Shop::getContextShopID());
-
-            foreach ($link['link'] as $key => $label) {
-                $link['link'][$key] = Tools::htmlentitiesDecodeUTF8($label);
-            }
-
             $linksLabelEdit = $link['link'];
             $labelsEdit = $link['label'];
             $newWindowEdit = $link['new_window'];

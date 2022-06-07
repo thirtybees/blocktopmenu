@@ -91,12 +91,16 @@ class MenuTopLinks
         $newWindow = false;
 
         foreach ($ret as $line) {
-            $link[$line['id_lang']] = Tools::safeOutput($line['link']);
-            $label[$line['id_lang']] = Tools::safeOutput($line['label']);
+            $link[$line['id_lang']] = $line['link'];
+            $label[$line['id_lang']] = $line['label'];
             $newWindow = (bool) $line['new_window'];
         }
 
-        return ['link' => $link, 'label' => $label, 'new_window' => $newWindow];
+        return [
+            'link' => $link,
+            'label' => $label,
+            'new_window' => $newWindow
+        ];
     }
 
     /**
