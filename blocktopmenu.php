@@ -431,7 +431,7 @@ class Blocktopmenu extends Module
             if (count($shops) > 1) {
                 foreach ($shops as $key => $idShop) {
                     $idShopGroup = Shop::getGroupFromShop($idShop);
-                    $conf .= (string) ($key > 1 ? ',' : '').Configuration::get('MOD_BLOCKTOPMENU_ITEMS', null, $idShopGroup, $idShop);
+                    $conf .= ($key > 1 ? ',' : '').Configuration::get('MOD_BLOCKTOPMENU_ITEMS', null, $idShopGroup, $idShop);
                 }
             } else {
                 $idShop = (int) $shops[0];
@@ -990,7 +990,7 @@ class Blocktopmenu extends Module
      */
     public function hookDisplayNav($params)
     {
-        return $this->hookDisplayTop($params);
+        return $this->hookDisplayTop();
     }
 
     /**
@@ -1383,7 +1383,6 @@ class Blocktopmenu extends Module
         $lang = new Language((int) Configuration::get('PS_LANG_DEFAULT'));
         $helper->default_form_language = $lang->id;
         $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG') ? Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG') : 0;
-        $this->fields_form = [];
         $helper->module = $this;
         $helper->identifier = $this->identifier;
         $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false).
@@ -1458,7 +1457,6 @@ class Blocktopmenu extends Module
         $lang = new Language((int) Configuration::get('PS_LANG_DEFAULT'));
         $helper->default_form_language = $lang->id;
         $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG') ? Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG') : 0;
-        $this->fields_form = [];
         $helper->identifier = $this->identifier;
         $helper->fields_value = $this->getAddLinkFieldsValues();
 
@@ -1537,6 +1535,7 @@ class Blocktopmenu extends Module
             $html .= '<optgroup label="'.$this->l('Shops').'">';
             $shops = Shop::getShopsCollection();
             foreach ($shops as $shop) {
+                /** @var Shop $shop */
                 if (!$shop->setUrl() && !$shop->getBaseURL()) {
                     continue;
                 }
@@ -1648,6 +1647,7 @@ class Blocktopmenu extends Module
         $shops = Shop::getContextListShopID();
         $isSearchOn = true;
         $maxLvlDepth = 0;
+        $showImages = true;
 
         foreach ($shops as $idShop) {
             $idShopGroup = Shop::getGroupFromShop($idShop);

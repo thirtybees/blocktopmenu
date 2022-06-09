@@ -34,14 +34,14 @@ class MenuTopLinks
 {
     /**
      * @param int      $idLang
-     * @param int|null $idLinksmenutop
+     * @param int      $idLinksmenutop
      * @param int      $idShop
      *
-     * @return array|false|null|PDOStatement
+     * @return array
      * @throws PrestaShopDatabaseException
      * @throws PrestaShopException
      */
-    public static function gets($idLang, $idLinksmenutop = null, $idShop)
+    public static function gets($idLang, $idLinksmenutop, $idShop)
     {
         $sql = 'SELECT l.id_linksmenutop, l.new_window, s.name, ll.link, ll.label
 				FROM '._DB_PREFIX_.'linksmenutop l
@@ -50,7 +50,8 @@ class MenuTopLinks
 				WHERE 1 '.((!is_null($idLinksmenutop)) ? ' AND l.id_linksmenutop = "'.(int) $idLinksmenutop.'"' : '').'
 				AND l.id_shop IN (0, '.(int) $idShop.')';
 
-        return Db::getInstance()->executeS($sql);
+        $ret = Db::getInstance()->executeS($sql);
+        return is_array($ret) ? $ret : [];
     }
 
     /**
@@ -58,7 +59,7 @@ class MenuTopLinks
      * @param int $idLang
      * @param int $idShop
      *
-     * @return array|false|null|PDOStatement
+     * @return array
      * @throws PrestaShopDatabaseException
      * @throws PrestaShopException
      */
@@ -113,7 +114,7 @@ class MenuTopLinks
      * @throws PrestaShopDatabaseException
      * @throws PrestaShopException
      */
-    public static function add($link, $label, $newWindow = 0, $idShop)
+    public static function add($link, $label, $newWindow, $idShop)
     {
         if (!is_array($label)) {
             return false;
@@ -133,17 +134,17 @@ class MenuTopLinks
 
         $result = true;
 
-        foreach ($label as $idLang => $label) {
-            $result &= Db::getInstance()->insert(
+        foreach ($label as $idLang => $labelValue) {
+            $result = Db::getInstance()->insert(
                 'linksmenutop_lang',
                 [
                     'id_linksmenutop' => (int) $idLinksmenutop,
                     'id_lang'         => (int) $idLang,
                     'id_shop'         => (int) $idShop,
-                    'label'           => pSQL($label),
+                    'label'           => pSQL($labelValue),
                     'link'            => pSQL($link[$idLang]),
                 ]
-            );
+            ) && $result;
         }
 
         return $result;
@@ -160,7 +161,7 @@ class MenuTopLinks
      * @throws PrestaShopDatabaseException
      * @throws PrestaShopException
      */
-    public static function update($link, $labels, $newWindow = 0, $idShop, $idLink)
+    public static function update($link, $labels, $newWindow, $idShop, $idLink)
     {
         if (!is_array($labels)) {
             return false;
@@ -178,8 +179,9 @@ class MenuTopLinks
             'id_linksmenutop = '.(int) $idLink
         );
 
+        $ret = true;
         foreach ($labels as $idLang => $label) {
-            Db::getInstance()->update(
+            $ret = Db::getInstance()->update(
                 'linksmenutop_lang',
                 [
                     'id_shop' => (int) $idShop,
@@ -187,8 +189,10 @@ class MenuTopLinks
                     'link'    => pSQL($link[$idLang]),
                 ],
                 'id_linksmenutop = '.(int) $idLink.' AND id_lang = '.(int) $idLang
-            );
+            ) && $ret;
         }
+
+        return $ret;
     }
 
     /**
