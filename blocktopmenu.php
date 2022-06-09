@@ -57,6 +57,7 @@ class Blocktopmenu extends Module
 
     /**
      * Blocktopmenu constructor.
+     * @throws PrestaShopException
      */
     public function __construct()
     {
@@ -79,6 +80,9 @@ class Blocktopmenu extends Module
      * @param bool $deleteParams
      *
      * @return bool
+     * @throws HTMLPurifier_Exception
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
      */
     public function install($deleteParams = true)
     {
@@ -159,6 +163,8 @@ class Blocktopmenu extends Module
      * @param bool $deleteParams
      *
      * @return bool
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
      */
     public function uninstall($deleteParams = true)
     {
@@ -196,6 +202,9 @@ class Blocktopmenu extends Module
 
     /**
      * @return bool
+     * @throws HTMLPurifier_Exception
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
      */
     public function reset()
     {
@@ -211,6 +220,11 @@ class Blocktopmenu extends Module
 
     /**
      * @return string
+     * @throws HTMLPurifier_Exception
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     * @throws SmartyException
+     * @throws SmartyException
      */
     public function getContent()
     {
@@ -403,6 +417,10 @@ class Blocktopmenu extends Module
         return '<div class="alert alert-info">'.$shopInfo.'</div>';
     }
 
+    /**
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     */
     protected function getMenuItems()
     {
         $items = Tools::getValue('items');
@@ -433,6 +451,8 @@ class Blocktopmenu extends Module
 
     /**
      * @return string
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
      */
     protected function makeMenuOption()
     {
@@ -529,7 +549,6 @@ class Blocktopmenu extends Module
     /**
      * Main method to generate menu items
      *
-     * @throws Adapter_Exception
      * @throws PrestaShopDatabaseException
      * @throws PrestaShopException
      */
@@ -644,10 +663,12 @@ class Blocktopmenu extends Module
     }
 
     /**
-     * @param array      $categories
+     * @param array $categories
      * @param array|null $itemsToSkip
      *
      * @return string
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
      */
     protected function generateCategoriesOption($categories, $itemsToSkip = null)
     {
@@ -812,6 +833,10 @@ class Blocktopmenu extends Module
         return [];
     }
 
+    /**
+     * @throws PrestaShopException
+     * @throws PrestaShopDatabaseException
+     */
     private function autoGenerateImages()
     {
         if ($this->autogenerateImages == null)
@@ -823,8 +848,10 @@ class Blocktopmenu extends Module
 
     /**
      * @param      $parent
-     * @param int  $depth
+     * @param int $depth
      * @param bool $idLang
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
      */
     protected function getCMSMenuItems($parent, $depth = 1, $idLang = false)
     {
@@ -864,13 +891,15 @@ class Blocktopmenu extends Module
     }
 
     /**
-     * @param int  $parent
-     * @param int  $depth
+     * @param int $parent
+     * @param int $depth
      * @param bool $idLang
      * @param null $itemsToSkip
      * @param bool $idShop
      *
      * @return string
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
      */
     protected function getCMSOptions($parent = 0, $depth = 1, $idLang = false, $itemsToSkip = null, $idShop = false)
     {
@@ -902,6 +931,8 @@ class Blocktopmenu extends Module
      * @param string|null $name
      *
      * @return string
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
      */
     protected function getCacheId($name = null)
     {
@@ -924,6 +955,9 @@ class Blocktopmenu extends Module
 
     /**
      * @return string
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     * @throws SmartyException
      */
     public function hookDisplayTop()
     {
@@ -952,6 +986,9 @@ class Blocktopmenu extends Module
      * @param array $params
      *
      * @return string
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     * @throws SmartyException
      */
     public function hookDisplayNav($params)
     {
@@ -1041,91 +1078,146 @@ class Blocktopmenu extends Module
         return Db::getInstance()->executeS($sql);
     }
 
+    /**
+     * @throws PrestaShopException
+     */
     public function hookActionObjectCategoryAddAfter($params)
     {
         $this->clearMenuCache();
     }
 
+    /**
+     * @throws PrestaShopException
+     */
     public function hookActionObjectCategoryUpdateAfter($params)
     {
         $this->clearMenuCache();
     }
 
+    /**
+     * @throws PrestaShopException
+     */
     public function hookActionObjectCategoryDeleteAfter($params)
     {
         $this->clearMenuCache();
     }
 
+    /**
+     * @throws PrestaShopException
+     */
     public function hookActionObjectCmsUpdateAfter($params)
     {
         $this->clearMenuCache();
     }
 
+    /**
+     * @throws PrestaShopException
+     */
     public function hookActionObjectCmsDeleteAfter($params)
     {
         $this->clearMenuCache();
     }
 
+    /**
+     * @throws PrestaShopException
+     */
     public function hookActionObjectCmsAddAfter($params)
     {
         $this->clearMenuCache();
     }
 
+    /**
+     * @throws PrestaShopException
+     */
     public function hookActionObjectSupplierUpdateAfter($params)
     {
         $this->clearMenuCache();
     }
 
+    /**
+     * @throws PrestaShopException
+     */
     public function hookActionObjectSupplierDeleteAfter($params)
     {
         $this->clearMenuCache();
     }
 
+    /**
+     * @throws PrestaShopException
+     */
     public function hookActionObjectSupplierAddAfter($params)
     {
         $this->clearMenuCache();
     }
 
+    /**
+     * @throws PrestaShopException
+     */
     public function hookActionObjectManufacturerUpdateAfter($params)
     {
         $this->clearMenuCache();
     }
 
+    /**
+     * @throws PrestaShopException
+     */
     public function hookActionObjectManufacturerDeleteAfter($params)
     {
         $this->clearMenuCache();
     }
 
+    /**
+     * @throws PrestaShopException
+     */
     public function hookActionObjectManufacturerAddAfter($params)
     {
         $this->clearMenuCache();
     }
 
+    /**
+     * @throws PrestaShopException
+     */
     public function hookActionObjectProductUpdateAfter($params)
     {
         $this->clearMenuCache();
     }
 
+    /**
+     * @throws PrestaShopException
+     */
     public function hookActionObjectProductDeleteAfter($params)
     {
         $this->clearMenuCache();
     }
 
+    /**
+     * @throws PrestaShopException
+     */
     public function hookActionObjectProductAddAfter($params)
     {
         $this->clearMenuCache();
     }
 
+    /**
+     * @throws PrestaShopException
+     */
     public function hookCategoryUpdate($params)
     {
         $this->clearMenuCache();
     }
 
+    /**
+     * @throws PrestaShopException
+     */
     protected function clearMenuCache()
     {
         $this->_clearCache('blocktopmenu.tpl');
     }
 
+    /**
+     * @throws PrestaShopException
+     * @throws PrestaShopDatabaseException
+     */
     public function hookActionShopDataDuplication($params)
     {
         $linksmenutop = Db::getInstance()->executeS('
@@ -1156,6 +1248,11 @@ class Blocktopmenu extends Module
         }
     }
 
+    /**
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     * @throws SmartyException
+     */
     public function renderForm()
     {
         $shops = Shop::getContextListShopID();
@@ -1304,6 +1401,11 @@ class Blocktopmenu extends Module
         return $helper->generateForm([$fieldsForm]);
     }
 
+    /**
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     * @throws SmartyException
+     */
     public function renderAddForm()
     {
         $fieldsForm = [
@@ -1384,6 +1486,10 @@ class Blocktopmenu extends Module
         return $helper->generateForm([$fieldsForm]);
     }
 
+    /**
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     */
     public function renderChoicesSelect()
     {
         $spacer = str_repeat('&nbsp;', $this->spacer_size);
@@ -1471,6 +1577,10 @@ class Blocktopmenu extends Module
     }
 
 
+    /**
+     * @throws PrestaShopException
+     * @throws PrestaShopDatabaseException
+     */
     public function customGetNestedCategories(
         $idShop,
         $rootCategory = null,
@@ -1532,6 +1642,10 @@ class Blocktopmenu extends Module
         return Cache::retrieve($cacheId);
     }
 
+    /**
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     */
     public function getConfigFieldsValues()
     {
         $shops = Shop::getContextListShopID();
@@ -1552,6 +1666,10 @@ class Blocktopmenu extends Module
         ];
     }
 
+    /**
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     */
     public function getAddLinkFieldsValues()
     {
         $linksLabelEdit = '';
@@ -1585,6 +1703,11 @@ class Blocktopmenu extends Module
         return $fieldsValues;
     }
 
+    /**
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     * @throws SmartyException
+     */
     public function renderList()
     {
         $shops = Shop::getContextListShopID();

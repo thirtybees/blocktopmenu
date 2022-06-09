@@ -197,6 +197,7 @@ class MenuTopLinks
      *
      * @return bool
      * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
      */
     public static function remove($idLinksmenutop, $idShop)
     {
