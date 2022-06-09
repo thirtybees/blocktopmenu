@@ -280,7 +280,7 @@ class Blocktopmenu extends Module
             if (Tools::isSubmit('submitBlocktopmenuLinks')) {
                 $errorsAddLink = [];
 
-                foreach ($languages as $key => $val) {
+                foreach ($languages as $val) {
                     $linksLabel[$val['id_lang']] = Tools::getValue('link_'.(int) $val['id_lang']);
                     $labels[$val['id_lang']] = Tools::getValue('label_'.(int) $val['id_lang']);
                 }
@@ -402,8 +402,6 @@ class Blocktopmenu extends Module
      */
     protected function getCurrentShopInfoMsg()
     {
-        $shopInfo = null;
-
         if (Shop::getContext() == Shop::CONTEXT_SHOP) {
             $shopInfo = sprintf($this->l('The modifications will be applied to shop: %s'), $this->context->shop->name);
         } else {
@@ -601,7 +599,7 @@ class Blocktopmenu extends Module
                     $link = new Link();
                     $this->_menu .= '<li><a href="'.$link->getPageLink('manufacturer').'" title="'.$this->l('All manufacturers').'">'.$this->l('All manufacturers').'</a><ul>'.PHP_EOL;
                     $manufacturers = Manufacturer::getManufacturers();
-                    foreach ($manufacturers as $key => $manufacturer) {
+                    foreach ($manufacturers as $manufacturer) {
                         $this->_menu .= '<li><a href="'.$link->getManufacturerLink((int) $manufacturer['id_manufacturer'], $manufacturer['link_rewrite']).'" title="'.Tools::safeOutput($manufacturer['name']).'">'.Tools::safeOutput($manufacturer['name']).'</a></li>'.PHP_EOL;
                     }
                     $this->_menu .= '</ul>';
@@ -626,7 +624,7 @@ class Blocktopmenu extends Module
                     $link = new Link();
                     $this->_menu .= '<li><a href="'.$link->getPageLink('supplier').'" title="'.$this->l('All suppliers').'">'.$this->l('All suppliers').'</a><ul>'.PHP_EOL;
                     $suppliers = Supplier::getSuppliers();
-                    foreach ($suppliers as $key => $supplier) {
+                    foreach ($suppliers as $supplier) {
                         $this->_menu .= '<li><a href="'.$link->getSupplierLink((int) $supplier['id_supplier'], $supplier['link_rewrite']).'" title="'.Tools::safeOutput($supplier['name']).'">'.Tools::safeOutput($supplier['name']).'</a></li>'.PHP_EOL;
                     }
                     $this->_menu .= '</ul>';
@@ -674,7 +672,7 @@ class Blocktopmenu extends Module
     {
         $html = '';
 
-        foreach ($categories as $key => $category) {
+        foreach ($categories as $category) {
             if (isset($itemsToSkip) /*&& !in_array('CAT'.(int)$category['id_category'], $items_to_skip)*/) {
                 $shop = (object) Shop::getShop((int) $category['id_shop']);
                 $html .= '<option value="CAT'.(int) $category['id_category'].'">'.str_repeat('&nbsp;', $this->spacer_size * (int) $category['level_depth']).$category['name'].' ('.$shop->name.')</option>';
@@ -708,7 +706,7 @@ class Blocktopmenu extends Module
 
         $html = '';
 
-        foreach ($categories as $key => $category) {
+        foreach ($categories as $category) {
             if ($category['level_depth'] > 1) {
                 $link = $this->context->link->getCategoryLink($category['id_category']);
             } else {
@@ -1234,7 +1232,7 @@ class Blocktopmenu extends Module
             $linksmenutop[$id]['new_id_linksmenutop'] = Db::getInstance()->Insert_ID();
         }
 
-        foreach ($linksmenutop as $id => $link) {
+        foreach ($linksmenutop as $link) {
             $lang = Db::getInstance()->executeS('
                     SELECT id_lang, '.(int) $params['new_id_shop'].', label, link
                     FROM '._DB_PREFIX_.'linksmenutop_lang
@@ -1525,7 +1523,6 @@ class Blocktopmenu extends Module
         $html .= '</optgroup>';
 
         // BEGIN Categories
-        $shop = new Shop((int) Shop::getContextShopID());
         $html .= '<optgroup label="'.$this->l('Categories').'">';
 
         $shopsToGet = Shop::getContextListShopID();
