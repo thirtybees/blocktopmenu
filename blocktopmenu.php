@@ -34,29 +34,51 @@ require __DIR__.'/menutoplinks.class.php';
  */
 class Blocktopmenu extends Module
 {
+    /**
+     * @var string
+     */
     protected $_menu = '';
+
+    /**
+     * @var string
+     */
     protected $_html = '';
+
+    /**
+     * @var int[]
+     */
     protected $user_groups;
+
+    /**
+     * @var bool|null
+     */
     protected $autogenerateImages = null;
 
-    /*
-     * Pattern for matching config values
+    /**
+     *
+     *
+     * @var string * Pattern for matching config values
      */
     protected $pattern = '/^([A-Z_]*)[0-9]+/';
 
-    /*
+    /**
      * Name of the controller
      * Used to set item selected or not in top menu
+     *
+     * @var string
      */
     protected $page_name = '';
 
-    /*
+    /**
      * Spaces per depth in BO
+     *
+     * @var string
      */
     protected $spacer_size = '5';
 
     /**
      * Blocktopmenu constructor.
+     *
      * @throws PrestaShopException
      */
     public function __construct()
@@ -80,8 +102,6 @@ class Blocktopmenu extends Module
      * @param bool $deleteParams
      *
      * @return bool
-     * @throws HTMLPurifier_Exception
-     * @throws PrestaShopDatabaseException
      * @throws PrestaShopException
      */
     public function install($deleteParams = true)
@@ -163,7 +183,7 @@ class Blocktopmenu extends Module
      * @param bool $deleteParams
      *
      * @return bool
-     * @throws PrestaShopDatabaseException
+     *
      * @throws PrestaShopException
      */
     public function uninstall($deleteParams = true)
@@ -202,8 +222,7 @@ class Blocktopmenu extends Module
 
     /**
      * @return bool
-     * @throws HTMLPurifier_Exception
-     * @throws PrestaShopDatabaseException
+     *
      * @throws PrestaShopException
      */
     public function reset()
@@ -220,10 +239,8 @@ class Blocktopmenu extends Module
 
     /**
      * @return string
-     * @throws HTMLPurifier_Exception
-     * @throws PrestaShopDatabaseException
+     *
      * @throws PrestaShopException
-     * @throws SmartyException
      * @throws SmartyException
      */
     public function getContent()
@@ -231,7 +248,7 @@ class Blocktopmenu extends Module
         $this->context->controller->addjQueryPlugin('hoverIntent');
 
         $idLang = (int) Context::getContext()->language->id;
-        $languages = $this->context->controller->getLanguages();
+        $languages = $this->getLanguages();
         $defaultLanguage = (int) Configuration::get('PS_LANG_DEFAULT');
 
         $labels = Tools::getValue('label') ? array_filter(Tools::getValue('label'), 'strlen') : [];
@@ -399,6 +416,8 @@ class Blocktopmenu extends Module
 
     /**
      * @return string
+     *
+     * @throws PrestaShopException
      */
     protected function getCurrentShopInfoMsg()
     {
@@ -416,7 +435,8 @@ class Blocktopmenu extends Module
     }
 
     /**
-     * @throws PrestaShopDatabaseException
+     * @return string[]
+     *
      * @throws PrestaShopException
      */
     protected function getMenuItems()
@@ -449,7 +469,7 @@ class Blocktopmenu extends Module
 
     /**
      * @return string
-     * @throws PrestaShopDatabaseException
+     *
      * @throws PrestaShopException
      */
     protected function makeMenuOption()
@@ -547,7 +567,6 @@ class Blocktopmenu extends Module
     /**
      * Main method to generate menu items
      *
-     * @throws PrestaShopDatabaseException
      * @throws PrestaShopException
      */
     protected function makeMenu()
@@ -665,7 +684,7 @@ class Blocktopmenu extends Module
      * @param array|null $itemsToSkip
      *
      * @return string
-     * @throws PrestaShopDatabaseException
+     *
      * @throws PrestaShopException
      */
     protected function generateCategoriesOption($categories, $itemsToSkip = null)
@@ -759,9 +778,10 @@ class Blocktopmenu extends Module
     /**
      * Return list of urls to category images
      *
-     * @param $categoryId
+     * @param int $categoryId
+     *
      * @return string[]
-     * @throws PrestaShopDatabaseException
+     *
      * @throws PrestaShopException
      */
     private function getCategoryImages($categoryId)
@@ -797,9 +817,10 @@ class Blocktopmenu extends Module
     /**
      * Returns images of 3 most priced products in category
      *
-     * @param $categoryId
+     * @param int $categoryId
+     *
      * @return string[]
-     * @throws PrestaShopDatabaseException
+     *
      * @throws PrestaShopException
      */
     private function generateCategoryImages($categoryId)
@@ -833,7 +854,6 @@ class Blocktopmenu extends Module
 
     /**
      * @throws PrestaShopException
-     * @throws PrestaShopDatabaseException
      */
     private function autoGenerateImages()
     {
@@ -845,10 +865,10 @@ class Blocktopmenu extends Module
     }
 
     /**
-     * @param      $parent
+     * @param int $parent
      * @param int $depth
      * @param bool $idLang
-     * @throws PrestaShopDatabaseException
+     *
      * @throws PrestaShopException
      */
     protected function getCMSMenuItems($parent, $depth = 1, $idLang = false)
@@ -896,7 +916,7 @@ class Blocktopmenu extends Module
      * @param bool $idShop
      *
      * @return string
-     * @throws PrestaShopDatabaseException
+     *
      * @throws PrestaShopException
      */
     protected function getCMSOptions($parent = 0, $depth = 1, $idLang = false, $itemsToSkip = null, $idShop = false)
@@ -929,7 +949,7 @@ class Blocktopmenu extends Module
      * @param string|null $name
      *
      * @return string
-     * @throws PrestaShopDatabaseException
+     *
      * @throws PrestaShopException
      */
     protected function getCacheId($name = null)
@@ -953,7 +973,7 @@ class Blocktopmenu extends Module
 
     /**
      * @return string
-     * @throws PrestaShopDatabaseException
+     *
      * @throws PrestaShopException
      * @throws SmartyException
      */
@@ -984,7 +1004,7 @@ class Blocktopmenu extends Module
      * @param array $params
      *
      * @return string
-     * @throws PrestaShopDatabaseException
+     *
      * @throws PrestaShopException
      * @throws SmartyException
      */
@@ -1000,7 +1020,7 @@ class Blocktopmenu extends Module
      * @param bool $idShop
      *
      * @return array|bool|false|null|PDOStatement
-     * @throws PrestaShopDatabaseException
+     *
      * @throws PrestaShopException
      */
     protected function getCMSCategories($recursive = false, $parent = 1, $idLang = false, $idShop = false)
@@ -1047,12 +1067,12 @@ class Blocktopmenu extends Module
     }
 
     /**
-     * @param int      $idCmsCategory
+     * @param int $idCmsCategory
      * @param int|bool $idShop
      * @param int|bool $idLang
      *
      * @return array|false|null|PDOStatement
-     * @throws PrestaShopDatabaseException
+     *
      * @throws PrestaShopException
      */
     protected function getCMSPages($idCmsCategory, $idShop = false, $idLang = false)
@@ -1214,7 +1234,6 @@ class Blocktopmenu extends Module
 
     /**
      * @throws PrestaShopException
-     * @throws PrestaShopDatabaseException
      */
     public function hookActionShopDataDuplication($params)
     {
@@ -1247,7 +1266,8 @@ class Blocktopmenu extends Module
     }
 
     /**
-     * @throws PrestaShopDatabaseException
+     * @return string
+     *
      * @throws PrestaShopException
      * @throws SmartyException
      */
@@ -1390,7 +1410,7 @@ class Blocktopmenu extends Module
         $helper->token = Tools::getAdminTokenLite('AdminModules');
         $helper->tpl_vars = [
             'fields_value'   => $this->getConfigFieldsValues(),
-            'languages'      => $this->context->controller->getLanguages(),
+            'languages'      => $this->getLanguages(),
             'id_language'    => $this->context->language->id,
             'choices'        => $this->renderChoicesSelect(),
             'selected_links' => $this->makeMenuOption(),
@@ -1399,7 +1419,8 @@ class Blocktopmenu extends Module
     }
 
     /**
-     * @throws PrestaShopDatabaseException
+     * @return string
+     *
      * @throws PrestaShopException
      * @throws SmartyException
      */
@@ -1476,14 +1497,15 @@ class Blocktopmenu extends Module
         $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false).
             '&configure='.$this->name.'&tab_module='.$this->tab.'&module_name='.$this->name;
         $helper->token = Tools::getAdminTokenLite('AdminModules');
-        $helper->languages = $this->context->controller->getLanguages();
+        $helper->languages = $this->getLanguages();
         $helper->default_form_language = (int) $this->context->language->id;
 
         return $helper->generateForm([$fieldsForm]);
     }
 
     /**
-     * @throws PrestaShopDatabaseException
+     * @return string
+     *
      * @throws PrestaShopException
      */
     public function renderChoicesSelect()
@@ -1574,8 +1596,9 @@ class Blocktopmenu extends Module
 
 
     /**
+     * @return array
+     *
      * @throws PrestaShopException
-     * @throws PrestaShopDatabaseException
      */
     public function customGetNestedCategories(
         $idShop,
@@ -1639,7 +1662,8 @@ class Blocktopmenu extends Module
     }
 
     /**
-     * @throws PrestaShopDatabaseException
+     * @return array
+     *
      * @throws PrestaShopException
      */
     public function getConfigFieldsValues()
@@ -1664,7 +1688,8 @@ class Blocktopmenu extends Module
     }
 
     /**
-     * @throws PrestaShopDatabaseException
+     * @return array
+     *
      * @throws PrestaShopException
      */
     public function getAddLinkFieldsValues()
@@ -1701,7 +1726,8 @@ class Blocktopmenu extends Module
     }
 
     /**
-     * @throws PrestaShopDatabaseException
+     * @return string
+     *
      * @throws PrestaShopException
      * @throws SmartyException
      */
@@ -1752,5 +1778,17 @@ class Blocktopmenu extends Module
         $helper->currentIndex = AdminController::$currentIndex.'&configure='.$this->name;
 
         return $helper->generateList($links, $fieldsList);
+    }
+
+    /**
+     * @return array
+     *
+     * @throws PrestaShopException
+     */
+    protected function getLanguages()
+    {
+        /** @var AdminController $controller */
+        $controller = $this->context->controller;
+        return $controller->getLanguages();
     }
 }

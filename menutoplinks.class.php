@@ -33,12 +33,12 @@ if ( ! defined('_TB_VERSION_')) {
 class MenuTopLinks
 {
     /**
-     * @param int      $idLang
-     * @param int      $idLinksmenutop
-     * @param int      $idShop
+     * @param int $idLang
+     * @param int|null $idLinksmenutop
+     * @param int $idShop
      *
      * @return array
-     * @throws PrestaShopDatabaseException
+     *
      * @throws PrestaShopException
      */
     public static function gets($idLang, $idLinksmenutop, $idShop)
@@ -55,12 +55,12 @@ class MenuTopLinks
     }
 
     /**
-     * @param int $idLinksmenutop
+     * @param int|null $idLinksmenutop
      * @param int $idLang
      * @param int $idShop
      *
      * @return array
-     * @throws PrestaShopDatabaseException
+     *
      * @throws PrestaShopException
      */
     public static function get($idLinksmenutop, $idLang, $idShop)
@@ -73,7 +73,6 @@ class MenuTopLinks
      * @param int $idShop
      *
      * @return array
-     * @throws PrestaShopDatabaseException
      * @throws PrestaShopException
      */
     public static function getLinkLang($idLinksmenutop, $idShop)
@@ -105,13 +104,13 @@ class MenuTopLinks
     }
 
     /**
-     * @param Link $link
-     * @param      $label
-     * @param int  $newWindow
-     * @param      $idShop
+     * @param array $link
+     * @param string $label
+     * @param int $newWindow
+     * @param int $idShop
      *
      * @return bool
-     * @throws PrestaShopDatabaseException
+     *
      * @throws PrestaShopException
      */
     public static function add($link, $label, $newWindow, $idShop)
@@ -151,14 +150,14 @@ class MenuTopLinks
     }
 
     /**
-     * @param     $link
-     * @param     $labels
+     * @param array $link
+     * @param array $labels
      * @param int $newWindow
-     * @param     $idShop
-     * @param     $idLink
+     * @param int $idShop
+     * @param int $idLink
      *
      * @return bool
-     * @throws PrestaShopDatabaseException
+     *
      * @throws PrestaShopException
      */
     public static function update($link, $labels, $newWindow, $idShop, $idLink)
@@ -200,14 +199,13 @@ class MenuTopLinks
      * @param int $idShop
      *
      * @return bool
-     * @throws PrestaShopDatabaseException
+     *
      * @throws PrestaShopException
      */
     public static function remove($idLinksmenutop, $idShop)
     {
-        $result = true;
-        $result &= Db::getInstance()->delete('linksmenutop', 'id_linksmenutop = '.(int) $idLinksmenutop.' AND id_shop = '.(int) $idShop);
-        $result &= Db::getInstance()->delete('linksmenutop_lang', 'id_linksmenutop = '.(int) $idLinksmenutop);
+        $result = Db::getInstance()->delete('linksmenutop', 'id_linksmenutop = '.(int) $idLinksmenutop.' AND id_shop = '.(int) $idShop);
+        $result = Db::getInstance()->delete('linksmenutop_lang', 'id_linksmenutop = '.(int) $idLinksmenutop) && $result;
 
         return $result;
     }
