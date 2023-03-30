@@ -429,7 +429,13 @@ class Blocktopmenu extends Module
     {
         $items = Tools::getValue('items');
         if (is_array($items) && count($items)) {
-            return $items;
+            $ret = [];
+            foreach ($items as $value) {
+                if (is_string($value) && $value) {
+                    $ret[] = $value;
+                }
+            }
+            return $ret;
         } else {
             $shops = Shop::getContextListShopID();
             $conf = null;
@@ -471,7 +477,9 @@ class Blocktopmenu extends Module
                 continue;
             }
 
-            preg_match(static::PATTERN, $item, $values);
+            if (! preg_match(static::PATTERN, $item, $values)) {
+                continue;
+            }
             $id = (int) substr($item, strlen($values[1]), strlen($item));
 
             switch (substr($item, 0, strlen($values[1]))) {
@@ -570,7 +578,9 @@ class Blocktopmenu extends Module
                 continue;
             }
 
-            preg_match(static::PATTERN, $item, $value);
+            if (! preg_match(static::PATTERN, $item, $value)) {
+                continue;
+            }
             $id = (int) substr($item, strlen($value[1]), strlen($item));
 
             switch (substr($item, 0, strlen($value[1]))) {
