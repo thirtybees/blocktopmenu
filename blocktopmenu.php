@@ -60,19 +60,12 @@ class Blocktopmenu extends Module
     protected $user_groups;
 
     /**
-     * @var bool|null
-     */
-    protected $autogenerateImages = null;
-
-    /**
      * Name of the controller
      * Used to set item selected or not in top menu
      *
      * @var string
      */
     protected $page_name = '';
-
-
 
     /**
      * Blocktopmenu constructor.
@@ -855,11 +848,7 @@ class Blocktopmenu extends Module
      */
     private function autoGenerateImages()
     {
-        if ($this->autogenerateImages == null)
-        {
-            $this->autogenerateImages = Configuration::get('MOD_BLOCKTOPMENU_SHOWIMAGES', false, Shop::getGroupFromShop($this->context->shop->id), $this->context->shop->id);
-        }
-        return (bool) $this->autogenerateImages;
+        return (bool)Configuration::get('MOD_BLOCKTOPMENU_SHOWIMAGES', false, Shop::getGroupFromShop($this->context->shop->id), $this->context->shop->id);
     }
 
     /**
