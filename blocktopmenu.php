@@ -55,11 +55,6 @@ class Blocktopmenu extends Module
     protected $_html = '';
 
     /**
-     * @var int[]
-     */
-    protected $user_groups;
-
-    /**
      * Name of the controller
      * Used to set item selected or not in top menu
      *
@@ -562,6 +557,10 @@ class Blocktopmenu extends Module
      */
     protected function makeMenu()
     {
+        $userGroups = ($this->context->customer->isLogged()
+            ? $this->context->customer->getGroups()
+            : [Configuration::get('PS_UNIDENTIFIED_GROUP')]);
+
         $menuItems = $this->getMenuItems();
         $idLang = (int) $this->context->language->id;
         $idShop = (int) Shop::getContextShopID();
@@ -576,7 +575,7 @@ class Blocktopmenu extends Module
 
             switch (substr($item, 0, strlen($value[1]))) {
                 case 'CAT':
-                    $this->_menu .= $this->generateCategoriesMenu(Category::getNestedCategories($id, $idLang, false, $this->user_groups));
+                    $this->_menu .= $this->generateCategoriesMenu(Category::getNestedCategories($id, $idLang, false, $userGroups));
                     break;
 
                 case 'PRD':
@@ -966,8 +965,6 @@ class Blocktopmenu extends Module
      */
     public function hookDisplayTop()
     {
-        $this->user_groups = ($this->context->customer->isLogged() ?
-            $this->context->customer->getGroups() : [Configuration::get('PS_UNIDENTIFIED_GROUP')]);
         $this->page_name = Dispatcher::getInstance()->getController();
         if (!$this->isCached('blocktopmenu.tpl', $this->getCacheId())) {
             if (Tools::isEmpty($this->_menu)) {
