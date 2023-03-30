@@ -35,6 +35,16 @@ require __DIR__.'/menutoplinks.class.php';
 class Blocktopmenu extends Module
 {
     /**
+     * Pattern for matching config values
+     */
+    const PATTERN = '/^([A-Z_]*)[0-9]+/';
+
+    /**
+     * Spaces per depth in BO
+     */
+    const SPACER_SIZE = 5;
+
+    /**
      * @var string
      */
     protected $_menu = '';
@@ -55,13 +65,6 @@ class Blocktopmenu extends Module
     protected $autogenerateImages = null;
 
     /**
-     *
-     *
-     * @var string * Pattern for matching config values
-     */
-    protected $pattern = '/^([A-Z_]*)[0-9]+/';
-
-    /**
      * Name of the controller
      * Used to set item selected or not in top menu
      *
@@ -69,12 +72,7 @@ class Blocktopmenu extends Module
      */
     protected $page_name = '';
 
-    /**
-     * Spaces per depth in BO
-     *
-     * @var string
-     */
-    protected $spacer_size = '5';
+
 
     /**
      * Blocktopmenu constructor.
@@ -485,7 +483,7 @@ class Blocktopmenu extends Module
                 continue;
             }
 
-            preg_match($this->pattern, $item, $values);
+            preg_match(static::PATTERN, $item, $values);
             $id = (int) substr($item, strlen($values[1]), strlen($item));
 
             switch (substr($item, 0, strlen($values[1]))) {
@@ -580,7 +578,7 @@ class Blocktopmenu extends Module
                 continue;
             }
 
-            preg_match($this->pattern, $item, $value);
+            preg_match(static::PATTERN, $item, $value);
             $id = (int) substr($item, strlen($value[1]), strlen($item));
 
             switch (substr($item, 0, strlen($value[1]))) {
@@ -694,7 +692,7 @@ class Blocktopmenu extends Module
         foreach ($categories as $category) {
             if (isset($itemsToSkip) /*&& !in_array('CAT'.(int)$category['id_category'], $items_to_skip)*/) {
                 $shop = (object) Shop::getShop((int) $category['id_shop']);
-                $html .= '<option value="CAT'.(int) $category['id_category'].'">'.str_repeat('&nbsp;', $this->spacer_size * (int) $category['level_depth']).$category['name'].' ('.$shop->name.')</option>';
+                $html .= '<option value="CAT'.(int) $category['id_category'].'">'.str_repeat('&nbsp;', static::SPACER_SIZE * (int) $category['level_depth']).$category['name'].' ('.$shop->name.')</option>';
             }
 
             if (isset($category['children']) && !empty($category['children'])) {
@@ -927,7 +925,7 @@ class Blocktopmenu extends Module
         $categories = $this->getCMSCategories(false, (int) $parent, (int) $idLang, (int) $idShop);
         $pages = $this->getCMSPages((int) $parent, (int) $idShop, (int) $idLang);
 
-        $spacer = str_repeat('&nbsp;', $this->spacer_size * (int) $depth);
+        $spacer = str_repeat('&nbsp;', static::SPACER_SIZE * (int) $depth);
 
         foreach ($categories as $category) {
             if (isset($itemsToSkip) && !in_array('CMS_CAT'.$category['id_cms_category'], $itemsToSkip)) {
@@ -1510,7 +1508,7 @@ class Blocktopmenu extends Module
      */
     public function renderChoicesSelect()
     {
-        $spacer = str_repeat('&nbsp;', $this->spacer_size);
+        $spacer = str_repeat('&nbsp;', static::SPACER_SIZE);
         $items = $this->getMenuItems();
 
         $html = '<select multiple="multiple" id="availableItems" style="width: 300px; height: 160px;">';
