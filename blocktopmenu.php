@@ -468,6 +468,7 @@ class Blocktopmenu extends Module
     {
         $idShop = (int) Shop::getContextShopID();
 
+        $modulesLink = $this->getModulesLinks();
         $menuItem = $this->getMenuItems();
         $idLang = (int) $this->context->language->id;
 
@@ -477,12 +478,17 @@ class Blocktopmenu extends Module
                 continue;
             }
 
-            if (! preg_match(static::PATTERN, $item, $values)) {
+            if (preg_match(static::PATTERN, $item, $values)) {
+                $id = (int) substr($item, strlen($values[1]), strlen($item));
+                $type = substr($item, 0, strlen($values[1]));
+            } elseif (isset($modulesLink[$item])) {
+                $type = 'MOD';
+                $id = 0;
+            } else {
                 continue;
             }
-            $id = (int) substr($item, strlen($values[1]), strlen($item));
 
-            switch (substr($item, 0, strlen($values[1]))) {
+            switch ($type) {
                 case 'CAT':
                     $category = new Category((int) $id, (int) $idLang);
                     if (Validate::isLoadedObject($category)) {
@@ -552,6 +558,9 @@ class Blocktopmenu extends Module
                         $html .= '<option selected="selected" value="SHOP'.(int) $id.'">'.$shop->name.'</option>'.PHP_EOL;
                     }
                     break;
+                case 'MOD':
+                    $html .= '<option selected="selected" value="'.$item.'">'.$modulesLink[$item]['name'].'</option>'.PHP_EOL;
+                    break;
             }
         }
 
@@ -569,6 +578,7 @@ class Blocktopmenu extends Module
             ? $this->context->customer->getGroups()
             : [Configuration::get('PS_UNIDENTIFIED_GROUP')]);
 
+        $modulesLink = $this->getModulesLinks();
         $menuItems = $this->getMenuItems();
         $idLang = (int) $this->context->language->id;
         $idShop = (int) Shop::getContextShopID();
@@ -578,12 +588,17 @@ class Blocktopmenu extends Module
                 continue;
             }
 
-            if (! preg_match(static::PATTERN, $item, $value)) {
+            if (preg_match(static::PATTERN, $item, $values)) {
+                $id = (int) substr($item, strlen($values[1]), strlen($item));
+                $type = substr($item, 0, strlen($values[1]));
+            } elseif (isset($modulesLink[$item])) {
+                $type = 'MOD';
+                $id = 0;
+            } else {
                 continue;
             }
-            $id = (int) substr($item, strlen($value[1]), strlen($item));
 
-            switch (substr($item, 0, strlen($value[1]))) {
+            switch ($type) {
                 case 'CAT':
                     $this->_menu .= $this->generateCategoriesMenu(Category::getNestedCategories($id, $idLang, false, $userGroups));
                     break;
@@ -675,6 +690,14 @@ class Blocktopmenu extends Module
                         $this->_menu .= '<li><a href="'.Tools::HtmlEntitiesUTF8($link[0]['link']).'"'.(($link[0]['new_window']) ? ' onclick="return !window.open(this.href);"' : '').' title="'.Tools::safeOutput($link[0]['label']).'">'.Tools::safeOutput($link[0]['label']).'</a></li>'.PHP_EOL;
                     }
                     break;
+                case 'MOD':
+                    $render = $modulesLink[$item]['render'];
+                    if (is_callable($render)) {
+                        $content = (string)call_user_func($render);
+                        if ($content) {
+                            $this->_menu .= $content;
+                        }
+                    }
             }
         }
     }
@@ -1583,9 +1606,48 @@ class Blocktopmenu extends Module
             }
         }
         $html .= '</optgroup>';
+
+        // Modules links
+        $moduleLinks = $this->getModulesLinks();
+        if ($moduleLinks) {
+            $html .= '<optgroup label="' . $this->l('Third party module links') . '">';
+            foreach ($moduleLinks as $id => $moduleLink) {
+                $html .= '<option value="'.$id.'">' . $spacer . Tools::safeOutput($moduleLink['name']) . '</option>';
+            }
+            $html .= '</optgroup>';
+        }
+
         $html .= '</select>';
 
         return $html;
+    }
+
+    /**
+     * @return array
+     *
+     * @throws PrestaShopException
+     */
+    public function getModulesLinks()
+    {
+        $links = [];
+        $result = Hook::exec('actionGetBlockTopMenuLinks', [], null, true);
+        if (is_array($result) && $result) {
+            foreach ($result as $module => $moduleLinks) {
+                if (is_array($moduleLinks) && $moduleLinks) {
+                    $moduleName = Module::getModuleName($module);
+                    foreach ($moduleLinks as $moduleLink) {
+                        if (isset($moduleLink['id']) && isset($moduleLink['render']) && isset($moduleLink['name'])) {
+                            $id = strtoupper('MOD_' . $module . '_' . $moduleLink['id']);
+                            $links[$id] = [
+                                'name' => $moduleName . ': ' . $moduleLink['name'],
+                                'render' => $moduleLink['render']
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+        return $links;
     }
 
 
