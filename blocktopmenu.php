@@ -497,7 +497,7 @@ class Blocktopmenu extends Module
                     break;
 
                 case 'PRD':
-                    $product = new Product((int) $id, true, (int) $idLang);
+                    $product = new Product((int) $id, false, (int) $idLang);
                     if (Validate::isLoadedObject($product)) {
                         $html .= '<option selected="selected" value="PRD'.$id.'">'.$product->name.'</option>'.PHP_EOL;
                     }
@@ -605,7 +605,7 @@ class Blocktopmenu extends Module
 
                 case 'PRD':
                     $selected = ($this->page_name == 'product' && (Tools::getValue('id_product') == $id)) ? ' class="sfHover"' : '';
-                    $product = new Product((int) $id, true, (int) $idLang);
+                    $product = new Product((int) $id, false, (int) $idLang);
                     if (!is_null($product->id)) {
                         $this->_menu .= '<li'.$selected.'><a href="'.Tools::HtmlEntitiesUTF8($product->getLink()).'" title="'.Tools::safeOutput($product->name).'">'.$product->name.'</a></li>'.PHP_EOL;
                     }
